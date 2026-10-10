@@ -1,0 +1,332 @@
+{
+  "gpu": "Tesla T4",
+  "method": "median of 3 runs, cuBLAS timed before and after each run, every config checked against cuBLAS (max rel err < 1e-3)",
+  "choices": {
+    "256": "t64x64_4x8",
+    "1024": "t128x128_8x8",
+    "2048": "t128x128_8x8",
+    "4096": "t128x128_8x8"
+  },
+  "results": {
+    "256": {
+      "lab_v5": {
+        "median_gflops": 398.1,
+        "median_pct_of_cublas": 30.8,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t64x64_8x8": {
+        "median_gflops": 668.7,
+        "median_pct_of_cublas": 52.1,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t64x64_4x8": {
+        "median_gflops": 1168.6,
+        "median_pct_of_cublas": 91.9,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t64x128_8x8": {
+        "median_gflops": 682.0,
+        "median_pct_of_cublas": 53.3,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x64_8x8": {
+        "median_gflops": 550.5,
+        "median_pct_of_cublas": 43.2,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x128_8x8": {
+        "median_gflops": 436.2,
+        "median_pct_of_cublas": 34.2,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x128_8x16": {
+        "median_gflops": 318.5,
+        "median_pct_of_cublas": 25.0,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x128_16x8": {
+        "median_gflops": 328.6,
+        "median_pct_of_cublas": 25.8,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x256_8x8": {
+        "median_gflops": 188.7,
+        "median_pct_of_cublas": 14.8,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t256x128_8x8": {
+        "median_gflops": 191.4,
+        "median_pct_of_cublas": 15.0,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x256_8x16": {
+        "median_gflops": 195.2,
+        "median_pct_of_cublas": 15.3,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x128_8x8_bk16": {
+        "median_gflops": 400.6,
+        "median_pct_of_cublas": 31.4,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "cuBLAS": {
+        "median_gflops": 1275.0,
+        "median_pct_of_cublas": 100.0,
+        "runs": 3,
+        "status": "PASS"
+      }
+    },
+    "1024": {
+      "lab_v5": {
+        "median_gflops": 2402.7,
+        "median_pct_of_cublas": 57.2,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t64x64_8x8": {
+        "median_gflops": 2880.3,
+        "median_pct_of_cublas": 63.9,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t64x64_4x8": {
+        "median_gflops": 3319.6,
+        "median_pct_of_cublas": 73.9,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t64x128_8x8": {
+        "median_gflops": 3050.1,
+        "median_pct_of_cublas": 73.8,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x64_8x8": {
+        "median_gflops": 3558.1,
+        "median_pct_of_cublas": 84.6,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x128_8x8": {
+        "median_gflops": 4012.1,
+        "median_pct_of_cublas": 97.1,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x128_8x16": {
+        "median_gflops": 3173.1,
+        "median_pct_of_cublas": 76.8,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x128_16x8": {
+        "median_gflops": 3793.6,
+        "median_pct_of_cublas": 92.6,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x256_8x8": {
+        "median_gflops": 3386.8,
+        "median_pct_of_cublas": 81.6,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t256x128_8x8": {
+        "median_gflops": 3828.9,
+        "median_pct_of_cublas": 91.7,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x256_8x16": {
+        "median_gflops": 3670.3,
+        "median_pct_of_cublas": 88.9,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x128_8x8_bk16": {
+        "median_gflops": 3826.6,
+        "median_pct_of_cublas": 92.7,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "cuBLAS": {
+        "median_gflops": 4130.2,
+        "median_pct_of_cublas": 100.0,
+        "runs": 3,
+        "status": "PASS"
+      }
+    },
+    "2048": {
+      "lab_v5": {
+        "median_gflops": 3396.9,
+        "median_pct_of_cublas": 80.8,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t64x64_8x8": {
+        "median_gflops": 3084.8,
+        "median_pct_of_cublas": 73.2,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t64x64_4x8": {
+        "median_gflops": 2988.8,
+        "median_pct_of_cublas": 71.3,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t64x128_8x8": {
+        "median_gflops": 3558.2,
+        "median_pct_of_cublas": 84.6,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x64_8x8": {
+        "median_gflops": 3931.1,
+        "median_pct_of_cublas": 93.8,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x128_8x8": {
+        "median_gflops": 4549.7,
+        "median_pct_of_cublas": 107.6,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x128_8x16": {
+        "median_gflops": 3823.0,
+        "median_pct_of_cublas": 91.1,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x128_16x8": {
+        "median_gflops": 4394.6,
+        "median_pct_of_cublas": 104.0,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x256_8x8": {
+        "median_gflops": 3565.3,
+        "median_pct_of_cublas": 85.1,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t256x128_8x8": {
+        "median_gflops": 4012.7,
+        "median_pct_of_cublas": 95.8,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x256_8x16": {
+        "median_gflops": 3868.9,
+        "median_pct_of_cublas": 92.0,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x128_8x8_bk16": {
+        "median_gflops": 4273.0,
+        "median_pct_of_cublas": 102.0,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "cuBLAS": {
+        "median_gflops": 4193.1,
+        "median_pct_of_cublas": 100.0,
+        "runs": 3,
+        "status": "PASS"
+      }
+    },
+    "4096": {
+      "lab_v5": {
+        "median_gflops": 3600.1,
+        "median_pct_of_cublas": 88.0,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t64x64_8x8": {
+        "median_gflops": 2860.1,
+        "median_pct_of_cublas": 70.6,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t64x64_4x8": {
+        "median_gflops": 2836.8,
+        "median_pct_of_cublas": 69.7,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t64x128_8x8": {
+        "median_gflops": 3206.3,
+        "median_pct_of_cublas": 78.7,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x64_8x8": {
+        "median_gflops": 3499.9,
+        "median_pct_of_cublas": 86.7,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x128_8x8": {
+        "median_gflops": 4009.7,
+        "median_pct_of_cublas": 99.3,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x128_8x16": {
+        "median_gflops": 3606.6,
+        "median_pct_of_cublas": 88.8,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x128_16x8": {
+        "median_gflops": 3906.9,
+        "median_pct_of_cublas": 96.8,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x256_8x8": {
+        "median_gflops": 3817.2,
+        "median_pct_of_cublas": 94.2,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t256x128_8x8": {
+        "median_gflops": 3985.2,
+        "median_pct_of_cublas": 98.4,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x256_8x16": {
+        "median_gflops": 4000.1,
+        "median_pct_of_cublas": 98.6,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "t128x128_8x8_bk16": {
+        "median_gflops": 3809.6,
+        "median_pct_of_cublas": 94.0,
+        "runs": 3,
+        "status": "PASS"
+      },
+      "cuBLAS": {
+        "median_gflops": 4050.8,
+        "median_pct_of_cublas": 100.0,
+        "runs": 3,
+        "status": "PASS"
+      }
+    }
+  }
+}

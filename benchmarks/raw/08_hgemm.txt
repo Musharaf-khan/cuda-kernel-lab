@@ -1,0 +1,41 @@
+cublasGemmEx vs CPU (double, same fp16 inputs): max rel err 2.3e-06 PASS
+HGEMM 256^3 (FP16 in, FP32 accumulate)   cublasGemmEx 0.008 ms = 4.2 TFLOPS (before 0.008, after 0.008)
+v1 WMMA naive (warp per 16x16 tile, global loads)  |    0.013 ms |   2.55 TFLOPS |  60.6% of cublasGemmEx | err 5.2e-06 PASS
+RESULT|HGEMM FP16 Tensor Cores|v1 WMMA naive (warp per 16x16 tile, global loads)|256^3|0.0132|2548.18|GFLOPS|60.6|of cublasGemmEx|PASS
+v2 WMMA tiled (128x128, smem, double-buffered)     |    0.013 ms |   2.62 TFLOPS |  62.4% of cublasGemmEx | err 5.2e-06 PASS
+RESULT|HGEMM FP16 Tensor Cores|v2 WMMA tiled (128x128, smem, double-buffered)|256^3|0.0128|2624.59|GFLOPS|62.4|of cublasGemmEx|PASS
+RESULT|HGEMM FP16 Tensor Cores|cublasGemmEx (FP16 in, FP32 accumulate)|256^3|0.0080|4204.39|GFLOPS|100.0|of cublasGemmEx|PASS
+cublasHgemm (FP16 output)                          |    0.007 ms |   4.87 TFLOPS | 115.8% of cublasGemmEx | err 1.9e-02 (FP16 output)
+RESULT|HGEMM FP16 Tensor Cores|cublasHgemm (FP16 in/out)|256^3|0.0069|4869.85|GFLOPS|115.8|of cublasGemmEx|PASS
+cublasSgemm (FP32)                                 |    0.020 ms |   1.66 TFLOPS |  39.5% of cublasGemmEx (FP32 SIMT, no Tensor Cores)
+RESULT|HGEMM FP16 Tensor Cores|cublasSgemm FP32 (no Tensor Cores, for scale)|256^3|0.0202|1660.72|GFLOPS|39.5|of cublasGemmEx|PASS
+HGEMM 1024^3 (FP16 in, FP32 accumulate)   cublasGemmEx 0.064 ms = 33.7 TFLOPS (before 0.062, after 0.066)
+v1 WMMA naive (warp per 16x16 tile, global loads)  |    0.593 ms |   3.62 TFLOPS |  10.7% of cublasGemmEx | err 0.0e+00 PASS
+RESULT|HGEMM FP16 Tensor Cores|v1 WMMA naive (warp per 16x16 tile, global loads)|1024^3|0.5931|3621.01|GFLOPS|10.7|of cublasGemmEx|PASS
+v2 WMMA tiled (128x128, smem, double-buffered)     |    0.093 ms |  22.97 TFLOPS |  68.1% of cublasGemmEx | err 0.0e+00 PASS
+RESULT|HGEMM FP16 Tensor Cores|v2 WMMA tiled (128x128, smem, double-buffered)|1024^3|0.0935|22974.94|GFLOPS|68.1|of cublasGemmEx|PASS
+RESULT|HGEMM FP16 Tensor Cores|cublasGemmEx (FP16 in, FP32 accumulate)|1024^3|0.0636|33741.70|GFLOPS|100.0|of cublasGemmEx|PASS
+cublasHgemm (FP16 output)                          |    0.062 ms |  34.59 TFLOPS | 102.5% of cublasGemmEx | err 6.5e-02 (FP16 output)
+RESULT|HGEMM FP16 Tensor Cores|cublasHgemm (FP16 in/out)|1024^3|0.0621|34587.56|GFLOPS|102.5|of cublasGemmEx|FAIL
+cublasSgemm (FP32)                                 |    0.368 ms |   5.84 TFLOPS |  17.3% of cublasGemmEx (FP32 SIMT, no Tensor Cores)
+RESULT|HGEMM FP16 Tensor Cores|cublasSgemm FP32 (no Tensor Cores, for scale)|1024^3|0.3680|5836.19|GFLOPS|17.3|of cublasGemmEx|PASS
+HGEMM 2048^3 (FP16 in, FP32 accumulate)   cublasGemmEx 0.607 ms = 28.3 TFLOPS (before 0.422, after 0.792)
+v1 WMMA naive (warp per 16x16 tile, global loads)  |    6.631 ms |   2.59 TFLOPS |   9.2% of cublasGemmEx | err 0.0e+00 PASS
+RESULT|HGEMM FP16 Tensor Cores|v1 WMMA naive (warp per 16x16 tile, global loads)|2048^3|6.6307|2590.97|GFLOPS|9.2|of cublasGemmEx|PASS
+v2 WMMA tiled (128x128, smem, double-buffered)     |    0.694 ms |  24.76 TFLOPS |  87.5% of cublasGemmEx | err 0.0e+00 PASS
+RESULT|HGEMM FP16 Tensor Cores|v2 WMMA tiled (128x128, smem, double-buffered)|2048^3|0.6938|24762.69|GFLOPS|87.5|of cublasGemmEx|PASS
+RESULT|HGEMM FP16 Tensor Cores|cublasGemmEx (FP16 in, FP32 accumulate)|2048^3|0.6069|28306.36|GFLOPS|100.0|of cublasGemmEx|PASS
+cublasHgemm (FP16 output)                          |    0.583 ms |  29.45 TFLOPS | 104.0% of cublasGemmEx | err 1.7e-01 (FP16 output)
+RESULT|HGEMM FP16 Tensor Cores|cublasHgemm (FP16 in/out)|2048^3|0.5833|29450.44|GFLOPS|104.0|of cublasGemmEx|FAIL
+cublasSgemm (FP32)                                 |    3.727 ms |   4.61 TFLOPS |  16.3% of cublasGemmEx (FP32 SIMT, no Tensor Cores)
+RESULT|HGEMM FP16 Tensor Cores|cublasSgemm FP32 (no Tensor Cores, for scale)|2048^3|3.7266|4610.01|GFLOPS|16.3|of cublasGemmEx|PASS
+HGEMM 4096^3 (FP16 in, FP32 accumulate)   cublasGemmEx 6.065 ms = 22.7 TFLOPS (before 5.580, after 6.550)
+v1 WMMA naive (warp per 16x16 tile, global loads)  |   65.645 ms |   2.09 TFLOPS |   9.2% of cublasGemmEx | err 0.0e+00 PASS
+RESULT|HGEMM FP16 Tensor Cores|v1 WMMA naive (warp per 16x16 tile, global loads)|4096^3|65.6446|2093.68|GFLOPS|9.2|of cublasGemmEx|PASS
+v2 WMMA tiled (128x128, smem, double-buffered)     |    8.818 ms |  15.59 TFLOPS |  68.8% of cublasGemmEx | err 0.0e+00 PASS
+RESULT|HGEMM FP16 Tensor Cores|v2 WMMA tiled (128x128, smem, double-buffered)|4096^3|8.8178|15586.57|GFLOPS|68.8|of cublasGemmEx|PASS
+RESULT|HGEMM FP16 Tensor Cores|cublasGemmEx (FP16 in, FP32 accumulate)|4096^3|6.0647|22662.25|GFLOPS|100.0|of cublasGemmEx|PASS
+cublasHgemm (FP16 output)                          |    4.412 ms |  31.15 TFLOPS | 137.5% of cublasGemmEx | err 3.9e-01 (FP16 output)
+RESULT|HGEMM FP16 Tensor Cores|cublasHgemm (FP16 in/out)|4096^3|4.4116|31154.11|GFLOPS|137.5|of cublasGemmEx|FAIL
+cublasSgemm (FP32)                                 |   34.086 ms |   4.03 TFLOPS |  17.8% of cublasGemmEx (FP32 SIMT, no Tensor Cores)
+RESULT|HGEMM FP16 Tensor Cores|cublasSgemm FP32 (no Tensor Cores, for scale)|4096^3|34.0858|4032.14|GFLOPS|17.8|of cublasGemmEx|PASS

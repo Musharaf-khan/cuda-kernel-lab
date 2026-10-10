@@ -1,10 +1,10 @@
 Stability check, logits in [90,110]: no max-subtraction -> 262144/262144 NaN/Inf outputs; stable v4 -> 0 NaN/Inf
 Softmax 4096 x 4096 (FP32)
-v1 thread-per-row, 3 passes            |    4.579 ms |   29.3 GB/s |   9% of peak |    1.0x vs v1 | err 4.3e-06 PASS
-RESULT|Softmax|v1 thread-per-row, 3 passes|4096x4096|4.5789|29.31|GB/s|9.2|of peak BW|PASS
-v2 block-per-row, 3 passes             |    0.746 ms |  180.0 GB/s |  56% of peak |    6.1x vs v1 | err 1.1e-06 PASS
-RESULT|Softmax|v2 block-per-row, 3 passes|4096x4096|0.7456|180.01|GB/s|56.3|of peak BW|PASS
-v3 online softmax, 2 passes            |    0.751 ms |  178.7 GB/s |  56% of peak |    6.1x vs v1 | err 1.2e-06 PASS
-RESULT|Softmax|v3 online softmax, 2 passes|4096x4096|0.7509|178.75|GB/s|55.9|of peak BW|PASS
-v4 register-cached, 1 pass (float4)    |    0.573 ms |  234.1 GB/s |  73% of peak |    8.0x vs v1 | err 1.1e-06 PASS
-RESULT|Softmax|v4 register-cached, 1 pass (float4)|4096x4096|0.5732|234.14|GB/s|73.2|of peak BW|PASS
+v1 thread-per-row, 3 passes            |    3.664 ms |   36.6 GB/s |  11% of peak |    1.0x vs v1 | err 4.3e-06 PASS
+RESULT|Softmax|v1 thread-per-row, 3 passes|4096x4096|3.6641|36.63|GB/s|11.4|of peak BW|PASS
+v2 block-per-row, 3 passes             |    0.697 ms |  192.5 GB/s |  60% of peak |    5.3x vs v1 | err 1.1e-06 PASS
+RESULT|Softmax|v2 block-per-row, 3 passes|4096x4096|0.6974|192.46|GB/s|60.1|of peak BW|PASS
+v3 online softmax, 2 passes            |    0.760 ms |  176.6 GB/s |  55% of peak |    4.8x vs v1 | err 1.2e-06 PASS
+RESULT|Softmax|v3 online softmax, 2 passes|4096x4096|0.7600|176.61|GB/s|55.2|of peak BW|PASS
+v4 register-cached, 1 pass (float4)    |    0.584 ms |  229.7 GB/s |  72% of peak |    6.3x vs v1 | err 1.1e-06 PASS
+RESULT|Softmax|v4 register-cached, 1 pass (float4)|4096x4096|0.5843|229.71|GB/s|71.8|of peak BW|PASS

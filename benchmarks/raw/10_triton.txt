@@ -1,0 +1,24 @@
+Triton 3.6.0, PyTorch 2.11.0+cu130 on Tesla T4
+softmax     triton 0.565 ms (237.7 GB/s) | torch 0.909 ms | 1.61x vs torch | True
+RESULT|Softmax|Triton (row in registers)|4096x4096|0.5647|237.67|GB/s|74.3|of peak BW|PASS
+RESULT|Softmax|PyTorch torch.softmax (same process as Triton)|4096x4096|0.9087|147.71|GB/s|0.0|-|PASS
+layernorm   triton 0.569 ms (235.7 GB/s) | torch 0.810 ms | 1.42x vs torch | True
+RESULT|LayerNorm|Triton (row in registers)|4096x4096|0.5694|235.72|GB/s|73.7|of peak BW|PASS
+RESULT|LayerNorm|PyTorch F.layer_norm (same process as Triton)|4096x4096|0.8097|165.77|GB/s|0.0|-|PASS
+add+LN      triton 1.152 ms (233.1 GB/s) | torch eager 1.628 ms | 1.41x | True
+RESULT|Residual add + LayerNorm|Triton fused add + LayerNorm|4096x4096|1.1515|233.12|GB/s|72.8|of peak BW|PASS
+attn N=1024   triton     4.388 ms (  978.9 GFLOPS, blocks 64x32, 4 warps) | SDPA     2.523 ms | 0.58x vs SDPA
+RESULT|Attention (BH=16, d=64)|Triton FlashAttention-style (best of 4 block shapes: 64x32)|N=1024|4.3877|978.87|GFLOPS|0.0|-|PASS
+RESULT|Attention (BH=16, d=64)|PyTorch SDPA (same process as Triton)|N=1024|2.5231|1702.24|GFLOPS|0.0|-|PASS
+attn N=2048   triton     9.244 ms ( 1858.6 GFLOPS, blocks 64x64, 4 warps) | SDPA     5.464 ms | 0.59x vs SDPA
+RESULT|Attention (BH=16, d=64)|Triton FlashAttention-style (best of 4 block shapes: 64x64)|N=2048|9.2436|1858.57|GFLOPS|0.0|-|PASS
+RESULT|Attention (BH=16, d=64)|PyTorch SDPA (same process as Triton)|N=2048|5.4644|3143.98|GFLOPS|0.0|-|PASS
+attn N=4096   triton    37.088 ms ( 1852.9 GFLOPS, blocks 64x64, 4 warps) | SDPA    24.064 ms | 0.65x vs SDPA
+RESULT|Attention (BH=16, d=64)|Triton FlashAttention-style (best of 4 block shapes: 64x64)|N=4096|37.0877|1852.89|GFLOPS|0.0|-|PASS
+RESULT|Attention (BH=16, d=64)|PyTorch SDPA (same process as Triton)|N=4096|24.0642|2855.67|GFLOPS|0.0|-|PASS
+attn N=8192   triton   146.706 ms ( 1873.7 GFLOPS, blocks 64x64, 4 warps) | SDPA    96.238 ms | 0.66x vs SDPA
+RESULT|Attention (BH=16, d=64)|Triton FlashAttention-style (best of 4 block shapes: 64x64)|N=8192|146.7055|1873.67|GFLOPS|0.0|-|PASS
+RESULT|Attention (BH=16, d=64)|PyTorch SDPA (same process as Triton)|N=8192|96.2384|2856.22|GFLOPS|0.0|-|PASS
+attn N=16384  triton   591.747 ms ( 1858.1 GFLOPS, blocks 64x64, 4 warps) | SDPA   401.744 ms | 0.68x vs SDPA
+RESULT|Attention (BH=16, d=64)|Triton FlashAttention-style (best of 4 block shapes: 64x64)|N=16384|591.7473|1858.08|GFLOPS|0.0|-|PASS
+RESULT|Attention (BH=16, d=64)|PyTorch SDPA (same process as Triton)|N=16384|401.7438|2736.85|GFLOPS|0.0|-|PASS

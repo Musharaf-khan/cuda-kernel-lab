@@ -1,0 +1,17 @@
+v6 uses autotuned config 't64x64_4x8' (from configs/sgemm_autotune.json)
+cuBLAS vs CPU (double) reference: max rel err 2.1e-06 PASS
+SGEMM 256x256x256
+v1 naive uncoalesced |     0.69 ms |    48.9 GFLOPS |  0.6% of peak |   2.8% of cuBLAS | err 4.6e-06 PASS
+RESULT|SGEMM|v1 naive (uncoalesced)|256^3|0.6861|48.91|GFLOPS|2.8|of cuBLAS|PASS
+v2 naive coalesced   |     0.05 ms |   678.9 GFLOPS |  8.4% of peak |  39.4% of cuBLAS | err 4.6e-06 PASS
+RESULT|SGEMM|v2 naive (coalesced)|256^3|0.0494|678.87|GFLOPS|39.4|of cuBLAS|PASS
+v3 smem tiled        |     0.04 ms |   844.9 GFLOPS | 10.4% of peak |  49.0% of cuBLAS | err 4.6e-06 PASS
+RESULT|SGEMM|v3 shared-mem tiled 32x32|256^3|0.0397|844.88|GFLOPS|49.0|of cuBLAS|PASS
+v4 2D register tile  |     0.07 ms |   455.1 GFLOPS |  5.6% of peak |  26.4% of cuBLAS | err 4.6e-06 PASS
+RESULT|SGEMM|v4 2D register tiling 8x8/thread|256^3|0.0737|455.11|GFLOPS|26.4|of cuBLAS|PASS
+v5 vectorized float4 |     0.06 ms |   540.6 GFLOPS |  6.7% of peak |  31.3% of cuBLAS | err 4.6e-06 PASS
+RESULT|SGEMM|v5 v4 + float4 + transposed A tile|256^3|0.0621|540.61|GFLOPS|31.3|of cuBLAS|PASS
+v6 autotuned         |     0.02 ms |  1631.5 GFLOPS | 20.1% of peak |  94.6% of cuBLAS | err 4.6e-06 PASS
+RESULT|SGEMM|v6 autotuned (t64x64_4x8)|256^3|0.0206|1631.52|GFLOPS|94.6|of cuBLAS|PASS
+cuBLAS               |     0.02 ms |  1724.6 GFLOPS | 21.3% of peak | (before 0.02 ms, after 0.02 ms)
+RESULT|SGEMM|cuBLAS (cublasSgemm)|256^3|0.0195|1724.63|GFLOPS|100.0|of cuBLAS|PASS

@@ -1,46 +1,51 @@
-==PROF== Connected to process 1613 (/content/cuda-kernel-lab/build/transpose)
+==WARNING== Note: Running with unmodified GPU clocks. If not controlled otherwise, profiling results may be inconsistent.
+==PROF== Connected to process 3262 (/content/cuda-kernel-lab/build/transpose)
 ==PROF== Profiling "copy" - 0: 0%....50%....100% - 3 passes
 ==PROF== Profiling "transpose_naive" - 1: 0%....50%....100% - 3 passes
 ==PROF== Profiling "transpose_tiled" - 2: 0%....50%....100% - 3 passes
 ==PROF== Profiling "transpose_tiled" - 3: 0%....50%....100% - 3 passes
-==PROF== Disconnected from process 1613
-[1613] transpose@127.0.0.1
+==PROF== Disconnected from process 3262
+[3262] transpose@127.0.0.1
   copy(float *, const float *, int) (128, 128, 1)x(32, 8, 1), Context 1, Stream 7, Device 0, CC 7.5
+    Warning: Data collection happened without fixed GPU frequencies. Profiling results may be inconsistent.
     Section: Command line profiler metrics
     -------------------------------------------------------- ----------- ------------
     Metric Name                                              Metric Unit Metric Value
     -------------------------------------------------------- ----------- ------------
-    dram__throughput.avg.pct_of_peak_sustained_elapsed                 %        84.73
+    dram__throughput.avg.pct_of_peak_sustained_elapsed                 %        82.85
     l1tex__data_bank_conflicts_pipe_lsu_mem_shared_op_ld.sum                        0
     l1tex__data_bank_conflicts_pipe_lsu_mem_shared_op_st.sum                        0
     -------------------------------------------------------- ----------- ------------
 
   transpose_naive(float *, const float *, int) (128, 128, 1)x(32, 8, 1), Context 1, Stream 7, Device 0, CC 7.5
+    Warning: Data collection happened without fixed GPU frequencies. Profiling results may be inconsistent.
     Section: Command line profiler metrics
     -------------------------------------------------------- ----------- ------------
     Metric Name                                              Metric Unit Metric Value
     -------------------------------------------------------- ----------- ------------
-    dram__throughput.avg.pct_of_peak_sustained_elapsed                 %        39.34
+    dram__throughput.avg.pct_of_peak_sustained_elapsed                 %        71.76
     l1tex__data_bank_conflicts_pipe_lsu_mem_shared_op_ld.sum                        0
     l1tex__data_bank_conflicts_pipe_lsu_mem_shared_op_st.sum                        0
     -------------------------------------------------------- ----------- ------------
 
   void transpose_tiled<0>(float *, const float *, int) (128, 128, 1)x(32, 8, 1), Context 1, Stream 7, Device 0, CC 7.5
+    Warning: Data collection happened without fixed GPU frequencies. Profiling results may be inconsistent.
     Section: Command line profiler metrics
     -------------------------------------------------------- ----------- ------------
     Metric Name                                              Metric Unit Metric Value
     -------------------------------------------------------- ----------- ------------
-    dram__throughput.avg.pct_of_peak_sustained_elapsed                 %        33.59
+    dram__throughput.avg.pct_of_peak_sustained_elapsed                 %        72.57
     l1tex__data_bank_conflicts_pipe_lsu_mem_shared_op_ld.sum               16,252,928
     l1tex__data_bank_conflicts_pipe_lsu_mem_shared_op_st.sum                        0
     -------------------------------------------------------- ----------- ------------
 
   void transpose_tiled<1>(float *, const float *, int) (128, 128, 1)x(32, 8, 1), Context 1, Stream 7, Device 0, CC 7.5
+    Warning: Data collection happened without fixed GPU frequencies. Profiling results may be inconsistent.
     Section: Command line profiler metrics
     -------------------------------------------------------- ----------- ------------
     Metric Name                                              Metric Unit Metric Value
     -------------------------------------------------------- ----------- ------------
-    dram__throughput.avg.pct_of_peak_sustained_elapsed                 %        74.53
+    dram__throughput.avg.pct_of_peak_sustained_elapsed                 %        75.43
     l1tex__data_bank_conflicts_pipe_lsu_mem_shared_op_ld.sum                        0
     l1tex__data_bank_conflicts_pipe_lsu_mem_shared_op_st.sum                        0
     -------------------------------------------------------- ----------- ------------

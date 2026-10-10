@@ -1,0 +1,336 @@
+# n=256 repeat=1
+SGEMM tune 256^3   cuBLAS 0.037 ms (before 0.037, after 0.037) = 906.0 GFLOPS
+A0 v5 re-expressed in the lab kernel (baseline)      |    0.120 ms |   279.0 GFLOPS |  30.8% of cuBLAS | err 4.6e-06 PASS
+TUNE|lab_v5|256|0.1203|279.01|30.80|PASS
+t64x64_8x8                                           |    0.071 ms |   472.3 GFLOPS |  52.1% of cuBLAS | err 4.6e-06 PASS
+TUNE|t64x64_8x8|256|0.0710|472.31|52.13|PASS
+t64x64_4x8                                           |    0.040 ms |   833.0 GFLOPS |  91.9% of cuBLAS | err 4.6e-06 PASS
+TUNE|t64x64_4x8|256|0.0403|833.04|91.94|PASS
+t64x128_8x8                                          |    0.070 ms |   481.5 GFLOPS |  53.1% of cuBLAS | err 4.6e-06 PASS
+TUNE|t64x128_8x8|256|0.0697|481.51|53.14|PASS
+t128x64_8x8                                          |    0.086 ms |   391.8 GFLOPS |  43.2% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x64_8x8|256|0.0856|391.78|43.24|PASS
+t128x128_8x8                                         |    0.111 ms |   303.4 GFLOPS |  33.5% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x128_8x8|256|0.1106|303.37|33.48|PASS
+t128x128_8x16                                        |    0.151 ms |   222.6 GFLOPS |  24.6% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x128_8x16|256|0.1508|222.57|24.57|PASS
+t128x128_16x8                                        |    0.146 ms |   229.3 GFLOPS |  25.3% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x128_16x8|256|0.1463|229.34|25.31|PASS
+t128x256_8x8                                         |    0.256 ms |   131.2 GFLOPS |  14.5% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x256_8x8|256|0.2558|131.20|14.48|PASS
+t256x128_8x8                                         |    0.252 ms |   132.9 GFLOPS |  14.7% of cuBLAS | err 4.6e-06 PASS
+TUNE|t256x128_8x8|256|0.2524|132.94|14.67|PASS
+t128x256_8x16                                        |    0.247 ms |   135.7 GFLOPS |  15.0% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x256_8x16|256|0.2473|135.70|14.98|PASS
+t128x128_8x8_bk16                                    |    0.120 ms |   279.5 GFLOPS |  30.8% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x128_8x8_bk16|256|0.1201|279.50|30.85|PASS
+TUNE|cuBLAS|256|0.0370|906.03|100.00|PASS
+
+# n=256 repeat=2
+SGEMM tune 256^3   cuBLAS 0.026 ms (before 0.026, after 0.026) = 1275.0 GFLOPS
+A0 v5 re-expressed in the lab kernel (baseline)      |    0.084 ms |   398.2 GFLOPS |  31.2% of cuBLAS | err 4.6e-06 PASS
+TUNE|lab_v5|256|0.0843|398.25|31.23|PASS
+t64x64_8x8                                           |    0.050 ms |   668.7 GFLOPS |  52.4% of cuBLAS | err 4.6e-06 PASS
+TUNE|t64x64_8x8|256|0.0502|668.74|52.45|PASS
+t64x64_4x8                                           |    0.029 ms |  1173.6 GFLOPS |  92.0% of cuBLAS | err 4.6e-06 PASS
+TUNE|t64x64_4x8|256|0.0286|1173.64|92.05|PASS
+t64x128_8x8                                          |    0.049 ms |   682.0 GFLOPS |  53.5% of cuBLAS | err 4.6e-06 PASS
+TUNE|t64x128_8x8|256|0.0492|681.96|53.49|PASS
+t128x64_8x8                                          |    0.061 ms |   550.5 GFLOPS |  43.2% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x64_8x8|256|0.0609|550.54|43.18|PASS
+t128x128_8x8                                         |    0.077 ms |   436.2 GFLOPS |  34.2% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x128_8x8|256|0.0769|436.21|34.21|PASS
+t128x128_8x16                                        |    0.105 ms |   318.5 GFLOPS |  25.0% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x128_8x16|256|0.1053|318.52|24.98|PASS
+t128x128_16x8                                        |    0.102 ms |   328.6 GFLOPS |  25.8% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x128_16x8|256|0.1021|328.60|25.77|PASS
+t128x256_8x8                                         |    0.178 ms |   188.7 GFLOPS |  14.8% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x256_8x8|256|0.1778|188.71|14.80|PASS
+t256x128_8x8                                         |    0.175 ms |   191.4 GFLOPS |  15.0% of cuBLAS | err 4.6e-06 PASS
+TUNE|t256x128_8x8|256|0.1753|191.39|15.01|PASS
+t128x256_8x16                                        |    0.172 ms |   195.2 GFLOPS |  15.3% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x256_8x16|256|0.1719|195.20|15.31|PASS
+t128x128_8x8_bk16                                    |    0.084 ms |   400.6 GFLOPS |  31.4% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x128_8x8_bk16|256|0.0838|400.64|31.42|PASS
+TUNE|cuBLAS|256|0.0263|1275.03|100.00|PASS
+
+# n=256 repeat=3
+SGEMM tune 256^3   cuBLAS 0.026 ms (before 0.026, after 0.025) = 1292.0 GFLOPS
+A0 v5 re-expressed in the lab kernel (baseline)      |    0.084 ms |   398.1 GFLOPS |  30.8% of cuBLAS | err 4.6e-06 PASS
+TUNE|lab_v5|256|0.0843|398.07|30.81|PASS
+t64x64_8x8                                           |    0.050 ms |   673.6 GFLOPS |  52.1% of cuBLAS | err 4.6e-06 PASS
+TUNE|t64x64_8x8|256|0.0498|673.55|52.13|PASS
+t64x64_4x8                                           |    0.029 ms |  1168.6 GFLOPS |  90.4% of cuBLAS | err 4.6e-06 PASS
+TUNE|t64x64_4x8|256|0.0287|1168.62|90.45|PASS
+t64x128_8x8                                          |    0.049 ms |   689.1 GFLOPS |  53.3% of cuBLAS | err 4.6e-06 PASS
+TUNE|t64x128_8x8|256|0.0487|689.11|53.34|PASS
+t128x64_8x8                                          |    0.058 ms |   578.5 GFLOPS |  44.8% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x64_8x8|256|0.0580|578.51|44.77|PASS
+t128x128_8x8                                         |    0.074 ms |   450.6 GFLOPS |  34.9% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x128_8x8|256|0.0745|450.61|34.88|PASS
+t128x128_8x16                                        |    0.102 ms |   329.4 GFLOPS |  25.5% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x128_8x16|256|0.1019|329.37|25.49|PASS
+t128x128_16x8                                        |    0.099 ms |   339.6 GFLOPS |  26.3% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x128_16x8|256|0.0988|339.62|26.29|PASS
+t128x256_8x8                                         |    0.172 ms |   194.9 GFLOPS |  15.1% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x256_8x8|256|0.1722|194.88|15.08|PASS
+t256x128_8x8                                         |    0.170 ms |   197.5 GFLOPS |  15.3% of cuBLAS | err 4.6e-06 PASS
+TUNE|t256x128_8x8|256|0.1699|197.50|15.29|PASS
+t128x256_8x16                                        |    0.166 ms |   202.0 GFLOPS |  15.6% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x256_8x16|256|0.1661|202.02|15.64|PASS
+t128x128_8x8_bk16                                    |    0.081 ms |   414.1 GFLOPS |  32.1% of cuBLAS | err 4.6e-06 PASS
+TUNE|t128x128_8x8_bk16|256|0.0810|414.10|32.05|PASS
+TUNE|cuBLAS|256|0.0260|1292.03|100.00|PASS
+
+# n=1024 repeat=1
+SGEMM tune 1024^3   cuBLAS 0.526 ms (before 0.521, after 0.530) = 4085.6 GFLOPS
+A0 v5 re-expressed in the lab kernel (baseline)      |    0.862 ms |  2492.0 GFLOPS |  61.0% of cuBLAS | err 2.5e-05 PASS
+TUNE|lab_v5|1024|0.8618|2491.96|60.99|PASS
+t64x64_8x8                                           |    0.822 ms |  2612.1 GFLOPS |  63.9% of cuBLAS | err 2.5e-05 PASS
+TUNE|t64x64_8x8|1024|0.8221|2612.10|63.93|PASS
+t64x64_4x8                                           |    0.711 ms |  3020.1 GFLOPS |  73.9% of cuBLAS | err 2.5e-05 PASS
+TUNE|t64x64_4x8|1024|0.7111|3020.10|73.92|PASS
+t64x128_8x8                                          |    0.712 ms |  3014.4 GFLOPS |  73.8% of cuBLAS | err 2.5e-05 PASS
+TUNE|t64x128_8x8|1024|0.7124|3014.37|73.78|PASS
+t128x64_8x8                                          |    0.604 ms |  3558.1 GFLOPS |  87.1% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x64_8x8|1024|0.6036|3558.09|87.09|PASS
+t128x128_8x8                                         |    0.538 ms |  3989.1 GFLOPS |  97.6% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x128_8x8|1024|0.5383|3989.08|97.64|PASS
+t128x128_8x16                                        |    0.673 ms |  3192.3 GFLOPS |  78.1% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x128_8x16|1024|0.6727|3192.29|78.14|PASS
+t128x128_16x8                                        |    0.566 ms |  3793.6 GFLOPS |  92.9% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x128_16x8|1024|0.5661|3793.59|92.85|PASS
+t128x256_8x8                                         |    0.634 ms |  3386.8 GFLOPS |  82.9% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x256_8x8|1024|0.6341|3386.81|82.90|PASS
+t256x128_8x8                                         |    0.561 ms |  3829.0 GFLOPS |  93.7% of cuBLAS | err 2.5e-05 PASS
+TUNE|t256x128_8x8|1024|0.5609|3828.95|93.72|PASS
+t128x256_8x16                                        |    0.585 ms |  3670.3 GFLOPS |  89.8% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x256_8x16|1024|0.5851|3670.33|89.84|PASS
+t128x128_8x8_bk16                                    |    0.564 ms |  3805.9 GFLOPS |  93.2% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x128_8x8_bk16|1024|0.5642|3805.94|93.15|PASS
+TUNE|cuBLAS|1024|0.5256|4085.60|100.00|PASS
+
+# n=1024 repeat=2
+SGEMM tune 1024^3   cuBLAS 0.443 ms (before 0.502, after 0.385) = 4842.8 GFLOPS
+A0 v5 re-expressed in the lab kernel (baseline)      |    0.894 ms |  2402.7 GFLOPS |  49.6% of cuBLAS | err 2.5e-05 PASS
+TUNE|lab_v5|1024|0.8938|2402.68|49.61|PASS
+t64x64_8x8                                           |    0.742 ms |  2893.6 GFLOPS |  59.8% of cuBLAS | err 2.5e-05 PASS
+TUNE|t64x64_8x8|1024|0.7422|2893.58|59.75|PASS
+t64x64_4x8                                           |    0.647 ms |  3319.6 GFLOPS |  68.5% of cuBLAS | err 2.5e-05 PASS
+TUNE|t64x64_4x8|1024|0.6469|3319.58|68.55|PASS
+t64x128_8x8                                          |    0.688 ms |  3120.9 GFLOPS |  64.4% of cuBLAS | err 2.5e-05 PASS
+TUNE|t64x128_8x8|1024|0.6881|3120.89|64.44|PASS
+t128x64_8x8                                          |    0.594 ms |  3612.8 GFLOPS |  74.6% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x64_8x8|1024|0.5944|3612.79|74.60|PASS
+t128x128_8x8                                         |    0.528 ms |  4065.2 GFLOPS |  83.9% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x128_8x8|1024|0.5283|4065.19|83.94|PASS
+t128x128_8x16                                        |    0.713 ms |  3013.4 GFLOPS |  62.2% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x128_8x16|1024|0.7127|3013.36|62.22|PASS
+t128x128_16x8                                        |    0.585 ms |  3671.7 GFLOPS |  75.8% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x128_16x8|1024|0.5849|3671.73|75.82|PASS
+t128x256_8x8                                         |    0.632 ms |  3395.3 GFLOPS |  70.1% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x256_8x8|1024|0.6325|3395.34|70.11|PASS
+t256x128_8x8                                         |    0.558 ms |  3851.3 GFLOPS |  79.5% of cuBLAS | err 2.5e-05 PASS
+TUNE|t256x128_8x8|1024|0.5576|3851.32|79.53|PASS
+t128x256_8x16                                        |    0.606 ms |  3541.7 GFLOPS |  73.1% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x256_8x16|1024|0.6063|3541.69|73.13|PASS
+t128x128_8x8_bk16                                    |    0.555 ms |  3869.7 GFLOPS |  79.9% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x128_8x8_bk16|1024|0.5550|3869.67|79.91|PASS
+TUNE|cuBLAS|1024|0.4434|4842.76|100.00|PASS
+
+# n=1024 repeat=3
+SGEMM tune 1024^3   cuBLAS 0.520 ms (before 0.505, after 0.535) = 4130.2 GFLOPS
+A0 v5 re-expressed in the lab kernel (baseline)      |    0.909 ms |  2361.3 GFLOPS |  57.2% of cuBLAS | err 2.5e-05 PASS
+TUNE|lab_v5|1024|0.9094|2361.34|57.17|PASS
+t64x64_8x8                                           |    0.746 ms |  2880.3 GFLOPS |  69.7% of cuBLAS | err 2.5e-05 PASS
+TUNE|t64x64_8x8|1024|0.7456|2880.34|69.74|PASS
+t64x64_4x8                                           |    0.624 ms |  3440.2 GFLOPS |  83.3% of cuBLAS | err 2.5e-05 PASS
+TUNE|t64x64_4x8|1024|0.6242|3440.16|83.29|PASS
+t64x128_8x8                                          |    0.704 ms |  3050.1 GFLOPS |  73.8% of cuBLAS | err 2.5e-05 PASS
+TUNE|t64x128_8x8|1024|0.7041|3050.14|73.85|PASS
+t128x64_8x8                                          |    0.615 ms |  3492.8 GFLOPS |  84.6% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x64_8x8|1024|0.6148|3492.78|84.57|PASS
+t128x128_8x8                                         |    0.535 ms |  4012.1 GFLOPS |  97.1% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x128_8x8|1024|0.5353|4012.10|97.14|PASS
+t128x128_8x16                                        |    0.677 ms |  3173.1 GFLOPS |  76.8% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x128_8x16|1024|0.6768|3173.06|76.83|PASS
+t128x128_16x8                                        |    0.561 ms |  3825.5 GFLOPS |  92.6% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x128_16x8|1024|0.5614|3825.52|92.62|PASS
+t128x256_8x8                                         |    0.637 ms |  3371.3 GFLOPS |  81.6% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x256_8x8|1024|0.6370|3371.26|81.62|PASS
+t256x128_8x8                                         |    0.567 ms |  3785.5 GFLOPS |  91.7% of cuBLAS | err 2.5e-05 PASS
+TUNE|t256x128_8x8|1024|0.5673|3785.54|91.66|PASS
+t128x256_8x16                                        |    0.585 ms |  3671.3 GFLOPS |  88.9% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x256_8x16|1024|0.5849|3671.27|88.89|PASS
+t128x128_8x8_bk16                                    |    0.561 ms |  3826.6 GFLOPS |  92.7% of cuBLAS | err 2.5e-05 PASS
+TUNE|t128x128_8x8_bk16|1024|0.5612|3826.64|92.65|PASS
+TUNE|cuBLAS|1024|0.5199|4130.18|100.00|PASS
+
+# n=2048 repeat=1
+SGEMM tune 2048^3   cuBLAS 4.064 ms (before 4.032, after 4.097) = 4226.9 GFLOPS
+A0 v5 re-expressed in the lab kernel (baseline)      |    5.039 ms |  3409.2 GFLOPS |  80.7% of cuBLAS | err 5.4e-05 PASS
+TUNE|lab_v5|2048|5.0392|3409.22|80.66|PASS
+t64x64_8x8                                           |    5.569 ms |  3084.8 GFLOPS |  73.0% of cuBLAS | err 5.4e-05 PASS
+TUNE|t64x64_8x8|2048|5.5691|3084.83|72.98|PASS
+t64x64_4x8                                           |    5.778 ms |  2973.4 GFLOPS |  70.3% of cuBLAS | err 5.4e-05 PASS
+TUNE|t64x64_4x8|2048|5.7778|2973.44|70.35|PASS
+t64x128_8x8                                          |    4.828 ms |  3558.3 GFLOPS |  84.2% of cuBLAS | err 5.4e-05 PASS
+TUNE|t64x128_8x8|2048|4.8282|3558.25|84.18|PASS
+t128x64_8x8                                          |    4.387 ms |  3915.8 GFLOPS |  92.6% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x64_8x8|2048|4.3873|3915.79|92.64|PASS
+t128x128_8x8                                         |    3.776 ms |  4549.7 GFLOPS | 107.6% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x128_8x8|2048|3.7761|4549.67|107.64|PASS
+t128x128_8x16                                        |    4.494 ms |  3823.0 GFLOPS |  90.4% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x128_8x16|2048|4.4938|3823.00|90.45|PASS
+t128x128_16x8                                        |    3.909 ms |  4394.6 GFLOPS | 104.0% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x128_16x8|2048|3.9094|4394.56|103.97|PASS
+t128x256_8x8                                         |    4.851 ms |  3541.8 GFLOPS |  83.8% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x256_8x8|2048|4.8506|3541.80|83.79|PASS
+t256x128_8x8                                         |    4.340 ms |  3958.1 GFLOPS |  93.6% of cuBLAS | err 5.4e-05 PASS
+TUNE|t256x128_8x8|2048|4.3404|3958.10|93.64|PASS
+t128x256_8x16                                        |    4.420 ms |  3886.7 GFLOPS |  92.0% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x256_8x16|2048|4.4202|3886.70|91.95|PASS
+t128x128_8x8_bk16                                    |    4.046 ms |  4246.6 GFLOPS | 100.5% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x128_8x8_bk16|2048|4.0455|4246.64|100.47|PASS
+TUNE|cuBLAS|2048|4.0645|4226.86|100.00|PASS
+
+# n=2048 repeat=2
+SGEMM tune 2048^3   cuBLAS 4.097 ms (before 4.088, after 4.106) = 4193.1 GFLOPS
+A0 v5 re-expressed in the lab kernel (baseline)      |    5.057 ms |  3397.0 GFLOPS |  81.0% of cuBLAS | err 5.4e-05 PASS
+TUNE|lab_v5|2048|5.0574|3396.95|81.01|PASS
+t64x64_8x8                                           |    5.364 ms |  3203.0 GFLOPS |  76.4% of cuBLAS | err 5.4e-05 PASS
+TUNE|t64x64_8x8|2048|5.3636|3203.04|76.39|PASS
+t64x64_4x8                                           |    5.647 ms |  3042.5 GFLOPS |  72.6% of cuBLAS | err 5.4e-05 PASS
+TUNE|t64x64_4x8|2048|5.6466|3042.49|72.56|PASS
+t64x128_8x8                                          |    4.675 ms |  3674.9 GFLOPS |  87.6% of cuBLAS | err 5.4e-05 PASS
+TUNE|t64x128_8x8|2048|4.6749|3674.90|87.64|PASS
+t128x64_8x8                                          |    4.332 ms |  3965.9 GFLOPS |  94.6% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x64_8x8|2048|4.3318|3965.94|94.58|PASS
+t128x128_8x8                                         |    3.712 ms |  4627.9 GFLOPS | 110.4% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x128_8x8|2048|3.7122|4627.92|110.37|PASS
+t128x128_8x16                                        |    4.454 ms |  3857.0 GFLOPS |  92.0% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x128_8x16|2048|4.4543|3856.95|91.98|PASS
+t128x128_16x8                                        |    3.800 ms |  4521.6 GFLOPS | 107.8% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x128_16x8|2048|3.7996|4521.55|107.83|PASS
+t128x256_8x8                                         |    4.710 ms |  3647.3 GFLOPS |  87.0% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x256_8x8|2048|4.7103|3647.32|86.98|PASS
+t256x128_8x8                                         |    4.275 ms |  4018.3 GFLOPS |  95.8% of cuBLAS | err 5.4e-05 PASS
+TUNE|t256x128_8x8|2048|4.2754|4018.30|95.83|PASS
+t128x256_8x16                                        |    4.455 ms |  3856.2 GFLOPS |  92.0% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x256_8x16|2048|4.4551|3856.21|91.97|PASS
+t128x128_8x8_bk16                                    |    4.011 ms |  4282.7 GFLOPS | 102.1% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x128_8x8_bk16|2048|4.0114|4282.74|102.14|PASS
+TUNE|cuBLAS|2048|4.0972|4193.08|100.00|PASS
+
+# n=2048 repeat=3
+SGEMM tune 2048^3   cuBLAS 4.100 ms (before 4.095, after 4.106) = 4189.9 GFLOPS
+A0 v5 re-expressed in the lab kernel (baseline)      |    5.077 ms |  3383.8 GFLOPS |  80.8% of cuBLAS | err 5.4e-05 PASS
+TUNE|lab_v5|2048|5.0770|3383.84|80.76|PASS
+t64x64_8x8                                           |    5.601 ms |  3067.2 GFLOPS |  73.2% of cuBLAS | err 5.4e-05 PASS
+TUNE|t64x64_8x8|2048|5.6012|3067.15|73.20|PASS
+t64x64_4x8                                           |    5.748 ms |  2988.8 GFLOPS |  71.3% of cuBLAS | err 5.4e-05 PASS
+TUNE|t64x64_4x8|2048|5.7480|2988.83|71.33|PASS
+t64x128_8x8                                          |    4.847 ms |  3544.3 GFLOPS |  84.6% of cuBLAS | err 5.4e-05 PASS
+TUNE|t64x128_8x8|2048|4.8472|3544.27|84.59|PASS
+t128x64_8x8                                          |    4.370 ms |  3931.0 GFLOPS |  93.8% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x64_8x8|2048|4.3703|3931.05|93.82|PASS
+t128x128_8x8                                         |    3.863 ms |  4447.4 GFLOPS | 106.1% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x128_8x8|2048|3.8629|4447.41|106.15|PASS
+t128x128_8x16                                        |    4.502 ms |  3816.1 GFLOPS |  91.1% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x128_8x16|2048|4.5020|3816.09|91.08|PASS
+t128x128_16x8                                        |    3.970 ms |  4327.5 GFLOPS | 103.3% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x128_16x8|2048|3.9700|4327.46|103.28|PASS
+t128x256_8x8                                         |    4.819 ms |  3565.4 GFLOPS |  85.1% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x256_8x8|2048|4.8186|3565.35|85.09|PASS
+t256x128_8x8                                         |    4.281 ms |  4012.7 GFLOPS |  95.8% of cuBLAS | err 5.4e-05 PASS
+TUNE|t256x128_8x8|2048|4.2814|4012.69|95.77|PASS
+t128x256_8x16                                        |    4.440 ms |  3868.9 GFLOPS |  92.3% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x256_8x16|2048|4.4405|3868.93|92.34|PASS
+t128x128_8x8_bk16                                    |    4.021 ms |  4273.0 GFLOPS | 102.0% of cuBLAS | err 5.4e-05 PASS
+TUNE|t128x128_8x8_bk16|2048|4.0205|4273.03|101.98|PASS
+TUNE|cuBLAS|2048|4.1003|4189.89|100.00|PASS
+
+# n=4096 repeat=1
+SGEMM tune 4096^3   cuBLAS 33.312 ms (before 33.116, after 33.508) = 4125.8 GFLOPS
+A0 v5 re-expressed in the lab kernel (baseline)      |   38.176 ms |  3600.1 GFLOPS |  87.3% of cuBLAS | err 0.0e+00 PASS
+TUNE|lab_v5|4096|38.1763|3600.11|87.26|PASS
+t64x64_8x8                                           |   47.484 ms |  2894.4 GFLOPS |  70.2% of cuBLAS | err 0.0e+00 PASS
+TUNE|t64x64_8x8|4096|47.4838|2894.44|70.15|PASS
+t64x64_4x8                                           |   48.449 ms |  2836.8 GFLOPS |  68.8% of cuBLAS | err 0.0e+00 PASS
+TUNE|t64x64_4x8|4096|48.4493|2836.76|68.76|PASS
+t64x128_8x8                                          |   42.313 ms |  3248.1 GFLOPS |  78.7% of cuBLAS | err 0.0e+00 PASS
+TUNE|t64x128_8x8|4096|42.3133|3248.13|78.73|PASS
+t128x64_8x8                                          |   38.004 ms |  3616.4 GFLOPS |  87.7% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x64_8x8|4096|38.0042|3616.42|87.65|PASS
+t128x128_8x8                                         |   33.187 ms |  4141.3 GFLOPS | 100.4% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x128_8x8|4096|33.1874|4141.29|100.38|PASS
+t128x128_8x16                                        |   37.528 ms |  3662.3 GFLOPS |  88.8% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x128_8x16|4096|37.5284|3662.27|88.77|PASS
+t128x128_16x8                                        |   34.014 ms |  4040.6 GFLOPS |  97.9% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x128_16x8|4096|34.0141|4040.65|97.94|PASS
+t128x256_8x8                                         |   36.005 ms |  3817.2 GFLOPS |  92.5% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x256_8x8|4096|36.0052|3817.20|92.52|PASS
+t256x128_8x8                                         |   34.018 ms |  4040.2 GFLOPS |  97.9% of cuBLAS | err 0.0e+00 PASS
+TUNE|t256x128_8x8|4096|34.0181|4040.17|97.92|PASS
+t128x256_8x16                                        |   33.853 ms |  4059.8 GFLOPS |  98.4% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x256_8x16|4096|33.8533|4059.84|98.40|PASS
+t128x128_8x8_bk16                                    |   35.759 ms |  3843.4 GFLOPS |  93.2% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x128_8x8_bk16|4096|35.7593|3843.44|93.16|PASS
+TUNE|cuBLAS|4096|33.3121|4125.79|100.00|PASS
+
+# n=4096 repeat=2
+SGEMM tune 4096^3   cuBLAS 33.928 ms (before 33.765, after 34.092) = 4050.9 GFLOPS
+A0 v5 re-expressed in the lab kernel (baseline)      |   37.870 ms |  3629.2 GFLOPS |  89.6% of cuBLAS | err 0.0e+00 PASS
+TUNE|lab_v5|4096|37.8705|3629.18|89.59|PASS
+t64x64_8x8                                           |   48.054 ms |  2860.1 GFLOPS |  70.6% of cuBLAS | err 0.0e+00 PASS
+TUNE|t64x64_8x8|4096|48.0538|2860.11|70.61|PASS
+t64x64_4x8                                           |   48.279 ms |  2846.8 GFLOPS |  70.3% of cuBLAS | err 0.0e+00 PASS
+TUNE|t64x64_4x8|4096|48.2787|2846.78|70.28|PASS
+t64x128_8x8                                          |   43.668 ms |  3147.3 GFLOPS |  77.7% of cuBLAS | err 0.0e+00 PASS
+TUNE|t64x128_8x8|4096|43.6685|3147.33|77.70|PASS
+t128x64_8x8                                          |   39.667 ms |  3464.8 GFLOPS |  85.5% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x64_8x8|4096|39.6673|3464.79|85.53|PASS
+t128x128_8x8                                         |   34.872 ms |  3941.2 GFLOPS |  97.3% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x128_8x8|4096|34.8721|3941.23|97.29|PASS
+t128x128_8x16                                        |   38.254 ms |  3592.8 GFLOPS |  88.7% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x128_8x16|4096|38.2537|3592.83|88.69|PASS
+t128x128_16x8                                        |   35.310 ms |  3892.4 GFLOPS |  96.1% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x128_16x8|4096|35.3100|3892.35|96.09|PASS
+t128x256_8x8                                         |   35.809 ms |  3838.1 GFLOPS |  94.7% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x256_8x8|4096|35.8089|3838.13|94.75|PASS
+t256x128_8x8                                         |   34.487 ms |  3985.2 GFLOPS |  98.4% of cuBLAS | err 0.0e+00 PASS
+TUNE|t256x128_8x8|4096|34.4875|3985.18|98.38|PASS
+t128x256_8x16                                        |   34.359 ms |  4000.1 GFLOPS |  98.7% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x256_8x16|4096|34.3585|4000.14|98.75|PASS
+t128x128_8x8_bk16                                    |   36.077 ms |  3809.6 GFLOPS |  94.0% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x128_8x8_bk16|4096|36.0770|3809.60|94.04|PASS
+TUNE|cuBLAS|4096|33.9284|4050.85|100.00|PASS
+
+# n=4096 repeat=3
+SGEMM tune 4096^3   cuBLAS 34.045 ms (before 34.004, after 34.086) = 4036.9 GFLOPS
+A0 v5 re-expressed in the lab kernel (baseline)      |   38.707 ms |  3550.7 GFLOPS |  88.0% of cuBLAS | err 0.0e+00 PASS
+TUNE|lab_v5|4096|38.7073|3550.73|87.96|PASS
+t64x64_8x8                                           |   48.135 ms |  2855.3 GFLOPS |  70.7% of cuBLAS | err 0.0e+00 PASS
+TUNE|t64x64_8x8|4096|48.1353|2855.26|70.73|PASS
+t64x64_4x8                                           |   48.821 ms |  2815.1 GFLOPS |  69.7% of cuBLAS | err 0.0e+00 PASS
+TUNE|t64x64_4x8|4096|48.8215|2815.13|69.73|PASS
+t64x128_8x8                                          |   42.865 ms |  3206.3 GFLOPS |  79.4% of cuBLAS | err 0.0e+00 PASS
+TUNE|t64x128_8x8|4096|42.8653|3206.30|79.42|PASS
+t128x64_8x8                                          |   39.270 ms |  3499.9 GFLOPS |  86.7% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x64_8x8|4096|39.2696|3499.88|86.70|PASS
+t128x128_8x8                                         |   34.276 ms |  4009.7 GFLOPS |  99.3% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x128_8x8|4096|34.2763|4009.73|99.33|PASS
+t128x128_8x16                                        |   38.107 ms |  3606.6 GFLOPS |  89.3% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x128_8x16|4096|38.1074|3606.63|89.34|PASS
+t128x128_16x8                                        |   35.178 ms |  3906.9 GFLOPS |  96.8% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x128_16x8|4096|35.1785|3906.91|96.78|PASS
+t128x256_8x8                                         |   36.153 ms |  3801.6 GFLOPS |  94.2% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x256_8x8|4096|36.1525|3801.64|94.17|PASS
+t256x128_8x8                                         |   34.519 ms |  3981.5 GFLOPS |  98.6% of cuBLAS | err 0.0e+00 PASS
+TUNE|t256x128_8x8|4096|34.5190|3981.55|98.63|PASS
+t128x256_8x16                                        |   34.524 ms |  3981.0 GFLOPS |  98.6% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x256_8x16|4096|34.5240|3980.97|98.61|PASS
+t128x128_8x8_bk16                                    |   36.106 ms |  3806.5 GFLOPS |  94.3% of cuBLAS | err 0.0e+00 PASS
+TUNE|t128x128_8x8_bk16|4096|36.1061|3806.53|94.29|PASS
+TUNE|cuBLAS|4096|34.0455|4036.93|100.00|PASS
+

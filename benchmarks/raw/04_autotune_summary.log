@@ -1,0 +1,58 @@
+
+n=256: best t64x64_4x8 (1168.6 GFLOPS, 91.9% of cuBLAS); lab_v5 (= v5) 398.1 GFLOPS
+   t64x64_4x8               1168.6 GFLOPS    91.9% of cuBLAS
+   t64x128_8x8               682.0 GFLOPS    53.3% of cuBLAS
+   t64x64_8x8                668.7 GFLOPS    52.1% of cuBLAS
+   t128x64_8x8               550.5 GFLOPS    43.2% of cuBLAS
+   t128x128_8x8              436.2 GFLOPS    34.2% of cuBLAS
+   t128x128_8x8_bk16         400.6 GFLOPS    31.4% of cuBLAS
+   lab_v5                    398.1 GFLOPS    30.8% of cuBLAS
+   t128x128_16x8             328.6 GFLOPS    25.8% of cuBLAS
+   t128x128_8x16             318.5 GFLOPS    25.0% of cuBLAS
+   t128x256_8x16             195.2 GFLOPS    15.3% of cuBLAS
+   t256x128_8x8              191.4 GFLOPS    15.0% of cuBLAS
+   t128x256_8x8              188.7 GFLOPS    14.8% of cuBLAS
+
+n=1024: best t128x128_8x8 (4012.1 GFLOPS, 97.1% of cuBLAS); lab_v5 (= v5) 2402.7 GFLOPS
+   t128x128_8x8             4012.1 GFLOPS    97.1% of cuBLAS
+   t256x128_8x8             3828.9 GFLOPS    91.7% of cuBLAS
+   t128x128_8x8_bk16        3826.6 GFLOPS    92.7% of cuBLAS
+   t128x128_16x8            3793.6 GFLOPS    92.6% of cuBLAS
+   t128x256_8x16            3670.3 GFLOPS    88.9% of cuBLAS
+   t128x64_8x8              3558.1 GFLOPS    84.6% of cuBLAS
+   t128x256_8x8             3386.8 GFLOPS    81.6% of cuBLAS
+   t64x64_4x8               3319.6 GFLOPS    73.9% of cuBLAS
+   t128x128_8x16            3173.1 GFLOPS    76.8% of cuBLAS
+   t64x128_8x8              3050.1 GFLOPS    73.8% of cuBLAS
+   t64x64_8x8               2880.3 GFLOPS    63.9% of cuBLAS
+   lab_v5                   2402.7 GFLOPS    57.2% of cuBLAS
+
+n=2048: best t128x128_8x8 (4549.7 GFLOPS, 107.6% of cuBLAS); lab_v5 (= v5) 3396.9 GFLOPS
+   t128x128_8x8             4549.7 GFLOPS   107.6% of cuBLAS
+   t128x128_16x8            4394.6 GFLOPS   104.0% of cuBLAS
+   t128x128_8x8_bk16        4273.0 GFLOPS   102.0% of cuBLAS
+   t256x128_8x8             4012.7 GFLOPS    95.8% of cuBLAS
+   t128x64_8x8              3931.1 GFLOPS    93.8% of cuBLAS
+   t128x256_8x16            3868.9 GFLOPS    92.0% of cuBLAS
+   t128x128_8x16            3823.0 GFLOPS    91.1% of cuBLAS
+   t128x256_8x8             3565.3 GFLOPS    85.1% of cuBLAS
+   t64x128_8x8              3558.2 GFLOPS    84.6% of cuBLAS
+   lab_v5                   3396.9 GFLOPS    80.8% of cuBLAS
+   t64x64_8x8               3084.8 GFLOPS    73.2% of cuBLAS
+   t64x64_4x8               2988.8 GFLOPS    71.3% of cuBLAS
+
+n=4096: best t128x128_8x8 (4009.7 GFLOPS, 99.3% of cuBLAS); lab_v5 (= v5) 3600.1 GFLOPS
+   t128x128_8x8             4009.7 GFLOPS    99.3% of cuBLAS
+   t128x256_8x16            4000.1 GFLOPS    98.6% of cuBLAS
+   t256x128_8x8             3985.2 GFLOPS    98.4% of cuBLAS
+   t128x128_16x8            3906.9 GFLOPS    96.8% of cuBLAS
+   t128x256_8x8             3817.2 GFLOPS    94.2% of cuBLAS
+   t128x128_8x8_bk16        3809.6 GFLOPS    94.0% of cuBLAS
+   t128x128_8x16            3606.6 GFLOPS    88.8% of cuBLAS
+   lab_v5                   3600.1 GFLOPS    88.0% of cuBLAS
+   t128x64_8x8              3499.9 GFLOPS    86.7% of cuBLAS
+   t64x128_8x8              3206.3 GFLOPS    78.7% of cuBLAS
+   t64x64_8x8               2860.1 GFLOPS    70.6% of cuBLAS
+   t64x64_4x8               2836.8 GFLOPS    69.7% of cuBLAS
+
+wrote configs/sgemm_autotune.json: {'256': 't64x64_4x8', '1024': 't128x128_8x8', '2048': 't128x128_8x8', '4096': 't128x128_8x8'}

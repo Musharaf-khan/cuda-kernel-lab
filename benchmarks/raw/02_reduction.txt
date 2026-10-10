@@ -1,6 +1,6 @@
-v1 atomic       |   36.037 ms |    1.9 GB/s |   1% of peak |   1.0x vs v1 | sum=16777216 PASS
-RESULT|Reduction (sum)|v1 atomicAdd per element|16M floats|36.0373|1.86|GB/s|0.6|of peak BW|PASS
-v2 shared tree  |    0.625 ms |  107.5 GB/s |  34% of peak |  57.7x vs v1 | sum=16777216 PASS
-RESULT|Reduction (sum)|v2 shared-mem tree|16M floats|0.6245|107.46|GB/s|33.6|of peak BW|PASS
-v3 warp shuffle |    0.271 ms |  247.8 GB/s |  77% of peak | 133.1x vs v1 | sum=16777216 PASS
-RESULT|Reduction (sum)|v3 grid-stride + warp shuffle|16M floats|0.2708|247.81|GB/s|77.4|of peak BW|PASS
+v1 atomic       |   35.502 ms |    1.9 GB/s |   1% of peak |   1.0x vs v1 | sum=16777216 PASS
+RESULT|Reduction (sum)|v1 atomicAdd per element|16M floats|35.5025|1.89|GB/s|0.6|of peak BW|PASS
+v2 shared tree  |    0.624 ms |  107.6 GB/s |  34% of peak |  56.9x vs v1 | sum=16777216 PASS
+RESULT|Reduction (sum)|v2 shared-mem tree|16M floats|0.6235|107.63|GB/s|33.6|of peak BW|PASS
+v3 warp shuffle |    0.270 ms |  248.3 GB/s |  78% of peak | 131.4x vs v1 | sum=16777216 PASS
+RESULT|Reduction (sum)|v3 grid-stride + warp shuffle|16M floats|0.2702|248.35|GB/s|77.6|of peak BW|PASS

@@ -1,0 +1,28 @@
+SGEMM attempts 4096^3   cuBLAS 36.571 ms (before 36.328, after 36.815) = 3758.1 GFLOPS
+A0 v5 re-expressed in the lab kernel (baseline)      |   40.078 ms |  3429.3 GFLOPS |  91.3% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM attempts|A0 v5 re-expressed in the lab kernel (baseline)|4096^3|40.0778|3429.30|GFLOPS|91.3|of cuBLAS|PASS
+B1 v5 + warp tiling (64x32 warp tile, 2 sub-tiles)   |   36.419 ms |  3773.8 GFLOPS | 100.4% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM attempts|B1 v5 + warp tiling (64x32 warp tile, 2 sub-tiles)|4096^3|36.4193|3773.80|GFLOPS|100.4|of cuBLAS|PASS
+B2 v5 + register-prefetch double buffering           |   41.236 ms |  3332.9 GFLOPS |  88.7% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM attempts|B2 v5 + register-prefetch double buffering|4096^3|41.2365|3332.95|GFLOPS|88.7|of cuBLAS|PASS
+B3a v5 with 128 threads (8x16 per thread)            |   39.338 ms |  3493.8 GFLOPS |  93.0% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM attempts|B3a v5 with 128 threads (8x16 per thread)|4096^3|39.3375|3493.84|GFLOPS|93.0|of cuBLAS|PASS
+B3b v5 with 512 threads (4x8 per thread)             |   44.402 ms |  3095.4 GFLOPS |  82.4% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM attempts|B3b v5 with 512 threads (4x8 per thread)|4096^3|44.4015|3095.37|GFLOPS|82.4|of cuBLAS|PASS
+B3c v5 + __launch_bounds__(256, 2)                   |   40.668 ms |  3379.5 GFLOPS |  89.9% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM attempts|B3c v5 + __launch_bounds__(256, 2)|4096^3|40.6682|3379.52|GFLOPS|89.9|of cuBLAS|PASS
+B4 v5 + padded transposed A tile (stride 132)        |   40.141 ms |  3423.9 GFLOPS |  91.1% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM attempts|B4 v5 + padded transposed A tile (stride 132)|4096^3|40.1413|3423.88|GFLOPS|91.1|of cuBLAS|PASS
+B5 v5 + BK=16 (half the barriers per FLOP)           |   41.437 ms |  3316.8 GFLOPS |  88.3% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM attempts|B5 v5 + BK=16 (half the barriers per FLOP)|4096^3|41.4373|3316.79|GFLOPS|88.3|of cuBLAS|PASS
+C2 warp tiling + double buffering                    |   37.454 ms |  3669.6 GFLOPS |  97.6% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM attempts|C2 warp tiling + double buffering|4096^3|37.4538|3669.56|GFLOPS|97.6|of cuBLAS|PASS
+C3 C2 + padded A tile                                |   36.482 ms |  3767.3 GFLOPS | 100.2% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM attempts|C3 C2 + padded A tile|4096^3|36.4821|3767.30|GFLOPS|100.2|of cuBLAS|PASS
+C4 C3 + BK=16                                        |   37.796 ms |  3636.3 GFLOPS |  96.8% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM attempts|C4 C3 + BK=16|4096^3|37.7963|3636.31|GFLOPS|96.8|of cuBLAS|PASS
+C4b C4 without padding (32 KB smem fits 2 blocks/SM) |   38.601 ms |  3560.5 GFLOPS |  94.7% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM attempts|C4b C4 without padding (32 KB smem fits 2 blocks/SM)|4096^3|38.6012|3560.49|GFLOPS|94.7|of cuBLAS|PASS
+C5 C4 + __launch_bounds__(256, 2)                    |   41.824 ms |  3286.1 GFLOPS |  87.4% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM attempts|C5 C4 + __launch_bounds__(256, 2)|4096^3|41.8243|3286.11|GFLOPS|87.4|of cuBLAS|PASS
+RESULT|SGEMM attempts|cuBLAS (same run)|4096^3|36.5713|3758.11|GFLOPS|100.0|of cuBLAS|PASS

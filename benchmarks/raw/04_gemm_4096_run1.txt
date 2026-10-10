@@ -1,13 +1,16 @@
+v6 uses autotuned config 't128x128_8x8' (from configs/sgemm_autotune.json)
 SGEMM 4096x4096x4096
-v1 naive uncoalesced |  2226.33 ms |    61.7 GFLOPS |  0.8% of peak |   1.7% of cuBLAS | err 0.0e+00 PASS
-RESULT|SGEMM|v1 naive (uncoalesced)|4096^3|2226.3296|61.73|GFLOPS|1.7|of cuBLAS|PASS
-v2 naive coalesced   |   262.22 ms |   524.1 GFLOPS |  6.5% of peak |  14.7% of cuBLAS | err 0.0e+00 PASS
-RESULT|SGEMM|v2 naive (coalesced)|4096^3|262.2228|524.13|GFLOPS|14.7|of cuBLAS|PASS
-v3 smem tiled        |   168.67 ms |   814.9 GFLOPS | 10.1% of peak |  22.8% of cuBLAS | err 0.0e+00 PASS
-RESULT|SGEMM|v3 shared-mem tiled 32x32|4096^3|168.6676|814.85|GFLOPS|22.8|of cuBLAS|PASS
-v4 2D register tile  |    45.83 ms |  2999.0 GFLOPS | 37.0% of peak |  83.9% of cuBLAS | err 0.0e+00 PASS
-RESULT|SGEMM|v4 2D register tiling 8x8/thread|4096^3|45.8282|2999.00|GFLOPS|83.9|of cuBLAS|PASS
-v5 vectorized float4 |    42.72 ms |  3217.2 GFLOPS | 39.7% of peak |  90.0% of cuBLAS | err 0.0e+00 PASS
-RESULT|SGEMM|v5 v4 + float4 + transposed A tile|4096^3|42.7196|3217.23|GFLOPS|90.0|of cuBLAS|PASS
-cuBLAS               |    38.45 ms |  3574.7 GFLOPS | 44.1% of peak | (before 36.82 ms, after 40.07 ms)
-RESULT|SGEMM|cuBLAS (cublasSgemm)|4096^3|38.4480|3574.67|GFLOPS|100.0|of cuBLAS|PASS
+v1 naive uncoalesced |  2224.20 ms |    61.8 GFLOPS |  0.8% of peak |   1.5% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v1 naive (uncoalesced)|4096^3|2224.1987|61.79|GFLOPS|1.5|of cuBLAS|PASS
+v2 naive coalesced   |   241.01 ms |   570.3 GFLOPS |  7.0% of peak |  14.3% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v2 naive (coalesced)|4096^3|241.0052|570.27|GFLOPS|14.3|of cuBLAS|PASS
+v3 smem tiled        |   154.07 ms |   892.1 GFLOPS | 11.0% of peak |  22.3% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v3 shared-mem tiled 32x32|4096^3|154.0651|892.08|GFLOPS|22.3|of cuBLAS|PASS
+v4 2D register tile  |    42.01 ms |  3271.8 GFLOPS | 40.4% of peak |  81.8% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v4 2D register tiling 8x8/thread|4096^3|42.0078|3271.75|GFLOPS|81.8|of cuBLAS|PASS
+v5 vectorized float4 |    38.75 ms |  3547.0 GFLOPS | 43.8% of peak |  88.7% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v5 v4 + float4 + transposed A tile|4096^3|38.7480|3546.99|GFLOPS|88.7|of cuBLAS|PASS
+v6 autotuned         |    33.06 ms |  4157.5 GFLOPS | 51.3% of peak | 104.0% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v6 autotuned (t128x128_8x8)|4096^3|33.0581|4157.50|GFLOPS|104.0|of cuBLAS|PASS
+cuBLAS               |    34.36 ms |  3999.5 GFLOPS | 49.4% of peak | (before 33.97 ms, after 34.76 ms)
+RESULT|SGEMM|cuBLAS (cublasSgemm)|4096^3|34.3641|3999.49|GFLOPS|100.0|of cuBLAS|PASS

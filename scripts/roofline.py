@@ -173,7 +173,7 @@ def plot(points, png, xlim=(0.01, 1000), ylim=(1, 20000), title=None):
                     fontsize=7.5, color=ink, zorder=4, va="center",
                     arrowprops=dict(arrowstyle="-", color=grid, lw=0.6) if dy < -3 else None)
 
-    gemm = [p for p in points if p["label"].startswith("GEMM v")]
+    gemm = sorted([p for p in points if p["label"].startswith("GEMM v")], key=lambda p: p["label"])
     for a, b in zip(gemm, gemm[1:]):          # the GEMM optimization path
         ax.annotate("", xy=(b["oi"], b["gflops"]), xytext=(a["oi"], a["gflops"]),
                     arrowprops=dict(arrowstyle="->", color=COLORS["Matrix multiply (SGEMM)"], lw=1.2, alpha=0.6),
@@ -210,6 +210,11 @@ def main():
             w.writerow([p["label"], p["family"], f"{p['oi']:.3f}", f"{p['gflops']:.1f}", f"{p['gbs']:.1f}", bound])
             print(f"{p['label']:<26} OI {p['oi']:9.3f} FLOP/B  {p['gflops']:9.1f} GFLOP/s  {p['gbs']:7.1f} GB/s  {bound}")
     main_pts = [p for p in points if p["family"] != FAMILY_DEFAULT or p["label"] in MAIN_MEMORY]
+    # Attention v2 has several variants: the main chart shows only the fastest (all are in the CSV).
+    v2 = [p for p in main_pts if p["label"].startswith("Attention fused v2")]
+    if v2:
+        best = max(v2, key=lambda p: p["gflops"])
+        main_pts = [p for p in main_pts if p not in v2] + [dict(best, label="Attention fused v2 (best variant)")]
     plot(main_pts, png)
     mem = [p for p in points if p["family"] == FAMILY_DEFAULT]
     if mem:

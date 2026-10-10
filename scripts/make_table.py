@@ -5,7 +5,8 @@
 Rules
 - Lines are grouped by (kernel, size), in the order they first appear.
 - If the same (kernel, version, size) appears in several runs (e.g. GEMM run 3 times),
-  the run with the MEDIAN time is kept and the run count is noted.
+  the time/throughput columns come from the run with the median time, and the "% of" column
+  (a same-run ratio, e.g. % of cuBLAS) is the median of the per-run ratios.
 - "Speedup" is relative to the first version listed in that group (the baseline).
 """
 import glob
@@ -63,7 +64,9 @@ def main():
                 speed = f"{base_ms / r['ms']:.2f}x" if base_ms else "-"
                 tp = f"{r['value']:,.1f} {r['unit']}"
                 ms = f"{r['ms']:.3f}"
-                pct = f"{r['pct']:.1f}% {r['pct_of']}" if r["pct_of"] != "-" and r["pct"] > 0 else "-"
+                # the % column is a same-run ratio, so take the median of the per-run ratios
+                pct_v = statistics.median([x["pct"] for x in ok_runs]) if ok_runs else r["pct"]
+                pct = f"{pct_v:.1f}% {r['pct_of']}" if r["pct_of"] != "-" and pct_v > 0 else "-"
             else:
                 speed, tp, ms, pct = "-", "-", "-", "-"
             check = r["status"] + (f" (median of {n})" if n > 1 else "")

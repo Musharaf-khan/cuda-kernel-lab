@@ -1,0 +1,370 @@
+==WARNING== Note: Running with unmodified GPU clocks. If not controlled otherwise, profiling results may be inconsistent.
+==PROF== Connected to process 3858 (/content/cuda-kernel-lab/build/attention)
+==PROF== Profiling "flash_attention_fwd": 0%....50%....100% - 8 passes
+==PROF== Profiling "flash_attention_split": 0%....50%....100% - 8 passes
+==PROF== Profiling "flash_attention_split": 0%....50%....100% - 8 passes
+==PROF== Profiling "flash_attention_split": 0%....50%....100% - 8 passes
+==PROF== Profiling "flash_attention_split": 0%....50%....100% - 8 passes
+Attention forward, FP32, BH=16 (batch 2 x 8 heads), d=64, non-causal
+==PROF== Disconnected from process 3858
+[3858] attention@127.0.0.1
+  void flash_attention_fwd<64, 64, 32>(const float *, const float *, const float *, float *, int, float) (32, 16, 1)x(64, 1, 1), Context 1, Stream 7, Device 0, CC 7.5
+    Warning: Data collection happened without fixed GPU frequencies. Profiling results may be inconsistent.
+    Section: Warp State Statistics
+    ---------------------------------------- ----------- ------------
+    Metric Name                              Metric Unit Metric Value
+    ---------------------------------------- ----------- ------------
+    Warp Cycles Per Issued Instruction             cycle         6.52
+    Warp Cycles Per Executed Instruction           cycle         6.52
+    Avg. Active Threads Per Warp                                   32
+    Avg. Not Predicated Off Threads Per Warp                    31.61
+    ---------------------------------------- ----------- ------------
+
+    WRN   The optional metric smsp__pcsamp_sample_count could not be found. Collecting it as an additional metric could 
+          enable the rule to provide more guidance.                                                                     
+    ----- --------------------------------------------------------------------------------------------------------------
+    OPT   Est. Local Speedup: 36.76%                                                                                    
+          On average, each warp of this workload spends 2.4 cycles being stalled waiting to be selected to fetch an     
+          instruction or waiting on an instruction cache miss. A high number of warps not having an instruction         
+          fetched is typical for very short kernels with less than one full wave of work in the grid. Excessively       
+          jumping across large blocks of assembly code can also lead to more warps stalled for this reason, if this     
+          causes misses in the instruction cache. See also the related Branch Resolving state. This stall type          
+          represents about 36.8% of the total average of 6.5 cycles between issuing two instructions.                   
+    ----- --------------------------------------------------------------------------------------------------------------
+    INF   Check the Warp Stall Sampling (All Samples) table for the top stall locations in your source based on         
+          sampling data. The Profiling Guide                                                                            
+          (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#metrics-reference) provides more details    
+          on each stall reason.                                                                                         
+
+    Section: Launch Statistics
+    -------------------------------- --------------- ---------------
+    Metric Name                          Metric Unit    Metric Value
+    -------------------------------- --------------- ---------------
+    Block Size                                                    64
+    Function Cache Configuration                     CachePreferNone
+    Grid Size                                                    512
+    Registers Per Thread             register/thread             254
+    Shared Memory Configuration Size           Kbyte           65.54
+    Driver Shared Memory Per Block        byte/block               0
+    Dynamic Shared Memory Per Block       byte/block               0
+    Static Shared Memory Per Block       Kbyte/block           16.38
+    # SMs                                         SM              40
+    Stack Size                                                 1,024
+    Threads                                   thread          32,768
+    # TPCs                                                        20
+    Enabled TPC IDs                                              all
+    Uses Green Context                                             0
+    Waves Per SM                                                3.20
+    -------------------------------- --------------- ---------------
+
+    OPT   Est. Speedup: 25%                                                                                             
+          A wave of thread blocks is defined as the maximum number of blocks that can be executed in parallel on the    
+          target GPU. The number of blocks in a wave depends on the number of multiprocessors and the theoretical       
+          occupancy of the kernel. This kernel launch results in 3 full waves and a partial wave of 33 thread blocks.   
+          Under the assumption of a uniform execution duration of all thread blocks, this partial wave may account for  
+          up to 25.0% of the total runtime of this kernel. Try launching a grid with no partial wave. The overall       
+          impact of this tail effect also lessens with the number of full waves executed for a grid. See the Hardware   
+          Model (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#metrics-hw-model) description for     
+          more details on launch configurations.                                                                        
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           16
+    Block Limit Registers                 block            4
+    Block Limit Shared Mem                block            4
+    Block Limit Warps                     block           16
+    Theoretical Active Warps per SM        warp            8
+    Theoretical Occupancy                     %           25
+    Achieved Occupancy                        %        23.43
+    Achieved Active Warps Per SM           warp         7.50
+    ------------------------------- ----------- ------------
+
+    OPT   Est. Local Speedup: 75%                                                                                       
+          The 2.00 theoretical warps per scheduler this kernel can issue according to its occupancy are below the       
+          hardware maximum of 8. This kernel's theoretical occupancy (25.0%) is limited by the number of required       
+          registers, and the required amount of shared memory.                                                          
+
+  void flash_attention_split<64, 64, 32, 2>(const float *, const float *, const float *, float *, int, float) (32, 16, 1)x(128, 1, 1), Context 1, Stream 7, Device 0, CC 7.5
+    Warning: Data collection happened without fixed GPU frequencies. Profiling results may be inconsistent.
+    Section: Warp State Statistics
+    ---------------------------------------- ----------- ------------
+    Metric Name                              Metric Unit Metric Value
+    ---------------------------------------- ----------- ------------
+    Warp Cycles Per Issued Instruction             cycle         8.41
+    Warp Cycles Per Executed Instruction           cycle         8.41
+    Avg. Active Threads Per Warp                                   32
+    Avg. Not Predicated Off Threads Per Warp                    31.28
+    ---------------------------------------- ----------- ------------
+
+    WRN   The optional metric smsp__pcsamp_sample_count could not be found. Collecting it as an additional metric could 
+          enable the rule to provide more guidance.                                                                     
+    ----- --------------------------------------------------------------------------------------------------------------
+    OPT   Est. Local Speedup: 52.39%                                                                                    
+          On average, each warp of this workload spends 4.4 cycles being stalled waiting for the MIO (memory            
+          input/output) instruction queue to be not full. This stall reason is high in cases of extreme utilization of  
+          the MIO pipelines, which include special math instructions, dynamic branches, as well as shared memory        
+          instructions. When caused by shared memory accesses, trying to use fewer but wider loads can reduce pipeline  
+          pressure. This stall type represents about 52.4% of the total average of 8.4 cycles between issuing two       
+          instructions.                                                                                                 
+    ----- --------------------------------------------------------------------------------------------------------------
+    INF   Check the Warp Stall Sampling (All Samples) table for the top stall locations in your source based on         
+          sampling data. The Profiling Guide                                                                            
+          (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#metrics-reference) provides more details    
+          on each stall reason.                                                                                         
+
+    Section: Launch Statistics
+    -------------------------------- --------------- ---------------
+    Metric Name                          Metric Unit    Metric Value
+    -------------------------------- --------------- ---------------
+    Block Size                                                   128
+    Function Cache Configuration                     CachePreferNone
+    Grid Size                                                    512
+    Registers Per Thread             register/thread             159
+    Shared Memory Configuration Size           Kbyte           65.54
+    Driver Shared Memory Per Block        byte/block               0
+    Dynamic Shared Memory Per Block       byte/block               0
+    Static Shared Memory Per Block       Kbyte/block           16.38
+    # SMs                                         SM              40
+    Stack Size                                                 1,024
+    Threads                                   thread          65,536
+    # TPCs                                                        20
+    Enabled TPC IDs                                              all
+    Uses Green Context                                             0
+    Waves Per SM                                                4.27
+    -------------------------------- --------------- ---------------
+
+    OPT   Est. Speedup: 20%                                                                                             
+          A wave of thread blocks is defined as the maximum number of blocks that can be executed in parallel on the    
+          target GPU. The number of blocks in a wave depends on the number of multiprocessors and the theoretical       
+          occupancy of the kernel. This kernel launch results in 4 full waves and a partial wave of 32 thread blocks.   
+          Under the assumption of a uniform execution duration of all thread blocks, this partial wave may account for  
+          up to 20.0% of the total runtime of this kernel. Try launching a grid with no partial wave. The overall       
+          impact of this tail effect also lessens with the number of full waves executed for a grid. See the Hardware   
+          Model (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#metrics-hw-model) description for     
+          more details on launch configurations.                                                                        
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           16
+    Block Limit Registers                 block            3
+    Block Limit Shared Mem                block            4
+    Block Limit Warps                     block            8
+    Theoretical Active Warps per SM        warp           12
+    Theoretical Occupancy                     %        37.50
+    Achieved Occupancy                        %        35.32
+    Achieved Active Warps Per SM           warp        11.30
+    ------------------------------- ----------- ------------
+
+    OPT   Est. Local Speedup: 62.5%                                                                                     
+          The 3.00 theoretical warps per scheduler this kernel can issue according to its occupancy are below the       
+          hardware maximum of 8. This kernel's theoretical occupancy (37.5%) is limited by the number of required       
+          registers.                                                                                                    
+
+  void flash_attention_split<64, 64, 32, 4>(const float *, const float *, const float *, float *, int, float) (32, 16, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 7.5
+    Warning: Data collection happened without fixed GPU frequencies. Profiling results may be inconsistent.
+    Section: Warp State Statistics
+    ---------------------------------------- ----------- ------------
+    Metric Name                              Metric Unit Metric Value
+    ---------------------------------------- ----------- ------------
+    Warp Cycles Per Issued Instruction             cycle        19.27
+    Warp Cycles Per Executed Instruction           cycle        19.28
+    Avg. Active Threads Per Warp                                   32
+    Avg. Not Predicated Off Threads Per Warp                    30.69
+    ---------------------------------------- ----------- ------------
+
+    WRN   The optional metric smsp__pcsamp_sample_count could not be found. Collecting it as an additional metric could 
+          enable the rule to provide more guidance.                                                                     
+    ----- --------------------------------------------------------------------------------------------------------------
+    OPT   Est. Local Speedup: 75.9%                                                                                     
+          On average, each warp of this workload spends 14.6 cycles being stalled waiting for the MIO (memory           
+          input/output) instruction queue to be not full. This stall reason is high in cases of extreme utilization of  
+          the MIO pipelines, which include special math instructions, dynamic branches, as well as shared memory        
+          instructions. When caused by shared memory accesses, trying to use fewer but wider loads can reduce pipeline  
+          pressure. This stall type represents about 75.9% of the total average of 19.3 cycles between issuing two      
+          instructions.                                                                                                 
+    ----- --------------------------------------------------------------------------------------------------------------
+    INF   Check the Warp Stall Sampling (All Samples) table for the top stall locations in your source based on         
+          sampling data. The Profiling Guide                                                                            
+          (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#metrics-reference) provides more details    
+          on each stall reason.                                                                                         
+
+    Section: Launch Statistics
+    -------------------------------- --------------- ---------------
+    Metric Name                          Metric Unit    Metric Value
+    -------------------------------- --------------- ---------------
+    Block Size                                                   256
+    Function Cache Configuration                     CachePreferNone
+    Grid Size                                                    512
+    Registers Per Thread             register/thread             125
+    Shared Memory Configuration Size           Kbyte           32.77
+    Driver Shared Memory Per Block        byte/block               0
+    Dynamic Shared Memory Per Block       byte/block               0
+    Static Shared Memory Per Block       Kbyte/block           16.38
+    # SMs                                         SM              40
+    Stack Size                                                 1,024
+    Threads                                   thread         131,072
+    # TPCs                                                        20
+    Enabled TPC IDs                                              all
+    Uses Green Context                                             0
+    Waves Per SM                                                6.40
+    -------------------------------- --------------- ---------------
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           16
+    Block Limit Registers                 block            2
+    Block Limit Shared Mem                block            2
+    Block Limit Warps                     block            4
+    Theoretical Active Warps per SM        warp           16
+    Theoretical Occupancy                     %           50
+    Achieved Occupancy                        %        48.21
+    Achieved Active Warps Per SM           warp        15.43
+    ------------------------------- ----------- ------------
+
+    OPT   Est. Local Speedup: 50%                                                                                       
+          The 4.00 theoretical warps per scheduler this kernel can issue according to its occupancy are below the       
+          hardware maximum of 8. This kernel's theoretical occupancy (50.0%) is limited by the number of required       
+          registers, and the required amount of shared memory.                                                          
+
+  void flash_attention_split<64, 64, 64, 4>(const float *, const float *, const float *, float *, int, float) (32, 16, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 7.5
+    Warning: Data collection happened without fixed GPU frequencies. Profiling results may be inconsistent.
+    Section: Warp State Statistics
+    ---------------------------------------- ----------- ------------
+    Metric Name                              Metric Unit Metric Value
+    ---------------------------------------- ----------- ------------
+    Warp Cycles Per Issued Instruction             cycle        10.64
+    Warp Cycles Per Executed Instruction           cycle        10.64
+    Avg. Active Threads Per Warp                                   32
+    Avg. Not Predicated Off Threads Per Warp                    30.80
+    ---------------------------------------- ----------- ------------
+
+    WRN   The optional metric smsp__pcsamp_sample_count could not be found. Collecting it as an additional metric could 
+          enable the rule to provide more guidance.                                                                     
+    ----- --------------------------------------------------------------------------------------------------------------
+    OPT   Est. Local Speedup: 70.2%                                                                                     
+          On average, each warp of this workload spends 7.5 cycles being stalled waiting for the MIO (memory            
+          input/output) instruction queue to be not full. This stall reason is high in cases of extreme utilization of  
+          the MIO pipelines, which include special math instructions, dynamic branches, as well as shared memory        
+          instructions. When caused by shared memory accesses, trying to use fewer but wider loads can reduce pipeline  
+          pressure. This stall type represents about 70.2% of the total average of 10.6 cycles between issuing two      
+          instructions.                                                                                                 
+    ----- --------------------------------------------------------------------------------------------------------------
+    INF   Check the Warp Stall Sampling (All Samples) table for the top stall locations in your source based on         
+          sampling data. The Profiling Guide                                                                            
+          (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#metrics-reference) provides more details    
+          on each stall reason.                                                                                         
+
+    Section: Launch Statistics
+    -------------------------------- --------------- ---------------
+    Metric Name                          Metric Unit    Metric Value
+    -------------------------------- --------------- ---------------
+    Block Size                                                   256
+    Function Cache Configuration                     CachePreferNone
+    Grid Size                                                    512
+    Registers Per Thread             register/thread             148
+    Shared Memory Configuration Size           Kbyte           32.77
+    Driver Shared Memory Per Block        byte/block               0
+    Dynamic Shared Memory Per Block       byte/block               0
+    Static Shared Memory Per Block       Kbyte/block           32.77
+    # SMs                                         SM              40
+    Stack Size                                                 1,024
+    Threads                                   thread         131,072
+    # TPCs                                                        20
+    Enabled TPC IDs                                              all
+    Uses Green Context                                             0
+    Waves Per SM                                               12.80
+    -------------------------------- --------------- ---------------
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           16
+    Block Limit Registers                 block            1
+    Block Limit Shared Mem                block            1
+    Block Limit Warps                     block            4
+    Theoretical Active Warps per SM        warp            8
+    Theoretical Occupancy                     %           25
+    Achieved Occupancy                        %        25.00
+    Achieved Active Warps Per SM           warp         8.00
+    ------------------------------- ----------- ------------
+
+    OPT   Est. Local Speedup: 75%                                                                                       
+          The 2.00 theoretical warps per scheduler this kernel can issue according to its occupancy are below the       
+          hardware maximum of 8. This kernel's theoretical occupancy (25.0%) is limited by the number of required       
+          registers, and the required amount of shared memory.                                                          
+
+  void flash_attention_split<64, 128, 32, 2>(const float *, const float *, const float *, float *, int, float) (16, 16, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 7.5
+    Warning: Data collection happened without fixed GPU frequencies. Profiling results may be inconsistent.
+    Section: Warp State Statistics
+    ---------------------------------------- ----------- ------------
+    Metric Name                              Metric Unit Metric Value
+    ---------------------------------------- ----------- ------------
+    Warp Cycles Per Issued Instruction             cycle         6.24
+    Warp Cycles Per Executed Instruction           cycle         6.24
+    Avg. Active Threads Per Warp                                   32
+    Avg. Not Predicated Off Threads Per Warp                    31.22
+    ---------------------------------------- ----------- ------------
+
+    WRN   The optional metric smsp__pcsamp_sample_count could not be found. Collecting it as an additional metric could 
+          enable the rule to provide more guidance.                                                                     
+    ----- --------------------------------------------------------------------------------------------------------------
+    OPT   Est. Local Speedup: 49.57%                                                                                    
+          On average, each warp of this workload spends 3.1 cycles being stalled waiting for the MIO (memory            
+          input/output) instruction queue to be not full. This stall reason is high in cases of extreme utilization of  
+          the MIO pipelines, which include special math instructions, dynamic branches, as well as shared memory        
+          instructions. When caused by shared memory accesses, trying to use fewer but wider loads can reduce pipeline  
+          pressure. This stall type represents about 49.6% of the total average of 6.2 cycles between issuing two       
+          instructions.                                                                                                 
+    ----- --------------------------------------------------------------------------------------------------------------
+    INF   Check the Warp Stall Sampling (All Samples) table for the top stall locations in your source based on         
+          sampling data. The Profiling Guide                                                                            
+          (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#metrics-reference) provides more details    
+          on each stall reason.                                                                                         
+
+    Section: Launch Statistics
+    -------------------------------- --------------- ---------------
+    Metric Name                          Metric Unit    Metric Value
+    -------------------------------- --------------- ---------------
+    Block Size                                                   256
+    Function Cache Configuration                     CachePreferNone
+    Grid Size                                                    256
+    Registers Per Thread             register/thread             159
+    Shared Memory Configuration Size           Kbyte           32.77
+    Driver Shared Memory Per Block        byte/block               0
+    Dynamic Shared Memory Per Block       byte/block               0
+    Static Shared Memory Per Block       Kbyte/block           16.38
+    # SMs                                         SM              40
+    Stack Size                                                 1,024
+    Threads                                   thread          65,536
+    # TPCs                                                        20
+    Enabled TPC IDs                                              all
+    Uses Green Context                                             0
+    Waves Per SM                                                6.40
+    -------------------------------- --------------- ---------------
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           16
+    Block Limit Registers                 block            1
+    Block Limit Shared Mem                block            2
+    Block Limit Warps                     block            4
+    Theoretical Active Warps per SM        warp            8
+    Theoretical Occupancy                     %           25
+    Achieved Occupancy                        %        24.99
+    Achieved Active Warps Per SM           warp         8.00
+    ------------------------------- ----------- ------------
+
+    OPT   Est. Local Speedup: 75%                                                                                       
+          The 2.00 theoretical warps per scheduler this kernel can issue according to its occupancy are below the       
+          hardware maximum of 8. This kernel's theoretical occupancy (25.0%) is limited by the number of required       
+          registers.                                                                                                    
+

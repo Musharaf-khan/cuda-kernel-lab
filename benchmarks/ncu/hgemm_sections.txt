@@ -1,0 +1,261 @@
+==WARNING== Note: Running with unmodified GPU clocks. If not controlled otherwise, profiling results may be inconsistent.
+==PROF== Connected to process 3745 (/content/cuda-kernel-lab/build/hgemm)
+==PROF== Profiling "hgemm_wmma_naive" - 0: 0%....50%....100% - 12 passes
+==PROF== Profiling "hgemm_wmma_tiled" - 1: 0%....50%....100% - 12 passes
+==PROF== Profiling "turing_s1688gemm_fp16_128x128..." - 2: 0%....50%....100% - 12 passes
+==PROF== Profiling "turing_h1688gemm_128x128_ldg8..." - 3: 0%....50%....100% - 12 passes
+==PROF== Disconnected from process 3745
+[3745] hgemm@127.0.0.1
+  hgemm_wmma_naive(int, const __half *, const __half *, float *) (128, 32, 1)x(128, 1, 1), Context 1, Stream 7, Device 0, CC 7.5
+    Warning: Data collection happened without fixed GPU frequencies. Profiling results may be inconsistent.
+    Section: GPU Speed Of Light Throughput
+    ----------------------- ----------- ------------
+    Metric Name             Metric Unit Metric Value
+    ----------------------- ----------- ------------
+    DRAM Frequency                  Ghz         5.00
+    SM Frequency                    Ghz         1.59
+    Elapsed Cycles                cycle    7,226,152
+    Memory Throughput                 %        49.82
+    DRAM Throughput                   %        40.76
+    Duration                         ms         4.55
+    L1/TEX Cache Throughput           %        99.65
+    L2 Cache Throughput               %        28.41
+    SM Active Cycles              cycle 7,164,224.40
+    Compute (SM) Throughput           %        17.58
+    ----------------------- ----------- ------------
+
+    OPT   This workload exhibits low compute throughput and memory bandwidth utilization relative to the peak           
+          performance of this device. Achieved compute throughput and/or memory bandwidth below 60.0% of peak           
+          typically indicate latency issues. Look at Scheduler Statistics and Warp State Statistics for potential       
+          reasons.                                                                                                      
+
+    Section: Warp State Statistics
+    ---------------------------------------- ----------- ------------
+    Metric Name                              Metric Unit Metric Value
+    ---------------------------------------- ----------- ------------
+    Warp Cycles Per Issued Instruction             cycle       137.72
+    Warp Cycles Per Executed Instruction           cycle       137.74
+    Avg. Active Threads Per Warp                                   32
+    Avg. Not Predicated Off Threads Per Warp                    31.98
+    ---------------------------------------- ----------- ------------
+
+    WRN   The optional metric smsp__pcsamp_sample_count could not be found. Collecting it as an additional metric could 
+          enable the rule to provide more guidance.                                                                     
+    ----- --------------------------------------------------------------------------------------------------------------
+    OPT   Est. Local Speedup: 83.61%                                                                                    
+          On average, each warp of this workload spends 115.2 cycles being stalled waiting for the L1 instruction queue 
+          for local and global (LG) memory operations to be not full. Typically, this stall occurs only when executing  
+          local or global memory instructions extremely frequently. Avoid redundant global memory accesses. Try to      
+          avoid using thread-local memory by checking if dynamically indexed arrays are declared in local scope, or if  
+          the kernel has excessive register pressure causing spills. If applicable, consider combining multiple         
+          lower-width memory operations into fewer wider memory operations and try interleaving memory operations and   
+          math instructions. This stall type represents about 83.6% of the total average of 137.7 cycles between        
+          issuing two instructions.                                                                                     
+    ----- --------------------------------------------------------------------------------------------------------------
+    INF   Check the Warp Stall Sampling (All Samples) table for the top stall locations in your source based on         
+          sampling data. The Profiling Guide                                                                            
+          (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#metrics-reference) provides more details    
+          on each stall reason.                                                                                         
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           16
+    Block Limit Registers                 block            8
+    Block Limit Shared Mem                block           16
+    Block Limit Warps                     block            8
+    Theoretical Active Warps per SM        warp           32
+    Theoretical Occupancy                     %          100
+    Achieved Occupancy                        %        96.14
+    Achieved Active Warps Per SM           warp        30.77
+    ------------------------------- ----------- ------------
+
+  hgemm_wmma_tiled(int, const __half *, const __half *, float *) (16, 16, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 7.5
+    Warning: Data collection happened without fixed GPU frequencies. Profiling results may be inconsistent.
+    Section: GPU Speed Of Light Throughput
+    ----------------------- ----------- ------------
+    Metric Name             Metric Unit Metric Value
+    ----------------------- ----------- ------------
+    DRAM Frequency                  Ghz         5.00
+    SM Frequency                    Ghz         1.47
+    Elapsed Cycles                cycle      884,369
+    Memory Throughput                 %        58.09
+    DRAM Throughput                   %        58.09
+    Duration                         us       601.41
+    L1/TEX Cache Throughput           %        75.13
+    L2 Cache Throughput               %        33.01
+    SM Active Cycles              cycle   803,660.75
+    Compute (SM) Throughput           %        47.74
+    ----------------------- ----------- ------------
+
+    OPT   This workload exhibits low compute throughput and memory bandwidth utilization relative to the peak           
+          performance of this device. Achieved compute throughput and/or memory bandwidth below 60.0% of peak           
+          typically indicate latency issues. Look at Scheduler Statistics and Warp State Statistics for potential       
+          reasons.                                                                                                      
+
+    Section: Warp State Statistics
+    ---------------------------------------- ----------- ------------
+    Metric Name                              Metric Unit Metric Value
+    ---------------------------------------- ----------- ------------
+    Warp Cycles Per Issued Instruction             cycle        11.66
+    Warp Cycles Per Executed Instruction           cycle        11.66
+    Avg. Active Threads Per Warp                                   32
+    Avg. Not Predicated Off Threads Per Warp                    31.62
+    ---------------------------------------- ----------- ------------
+
+    WRN   The optional metric smsp__pcsamp_sample_count could not be found. Collecting it as an additional metric could 
+          enable the rule to provide more guidance.                                                                     
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           16
+    Block Limit Registers                 block            1
+    Block Limit Shared Mem                block            1
+    Block Limit Warps                     block            4
+    Theoretical Active Warps per SM        warp            8
+    Theoretical Occupancy                     %           25
+    Achieved Occupancy                        %        24.97
+    Achieved Active Warps Per SM           warp         7.99
+    ------------------------------- ----------- ------------
+
+    OPT   Est. Local Speedup: 75%                                                                                       
+          The 2.00 theoretical warps per scheduler this kernel can issue according to its occupancy are below the       
+          hardware maximum of 8. This kernel's theoretical occupancy (25.0%) is limited by the number of required       
+          registers, and the required amount of shared memory.                                                          
+
+  turing_s1688gemm_fp16_128x128_ldg8_nn (16, 16, 1)x(128, 1, 1), Context 1, Stream 7, Device 0, CC 7.5
+    Warning: Data collection happened without fixed GPU frequencies. Profiling results may be inconsistent.
+    Section: GPU Speed Of Light Throughput
+    ----------------------- ----------- ------------
+    Metric Name             Metric Unit Metric Value
+    ----------------------- ----------- ------------
+    DRAM Frequency                  Ghz         5.00
+    SM Frequency                    Ghz         1.39
+    Elapsed Cycles                cycle      594,192
+    Memory Throughput                 %        63.82
+    DRAM Throughput                   %        63.82
+    Duration                         us       425.76
+    L1/TEX Cache Throughput           %        78.33
+    L2 Cache Throughput               %        49.09
+    SM Active Cycles              cycle   542,447.35
+    Compute (SM) Throughput           %        71.29
+    ----------------------- ----------- ------------
+
+    INF   Compute and Memory are well-balanced: To reduce runtime, both computation and memory traffic must be reduced. 
+          Check both the Compute Workload Analysis and Memory Workload Analysis sections.                               
+
+    Section: Warp State Statistics
+    ---------------------------------------- ----------- ------------
+    Metric Name                              Metric Unit Metric Value
+    ---------------------------------------- ----------- ------------
+    Warp Cycles Per Issued Instruction             cycle        13.03
+    Warp Cycles Per Executed Instruction           cycle        13.03
+    Avg. Active Threads Per Warp                                   32
+    Avg. Not Predicated Off Threads Per Warp                    31.92
+    ---------------------------------------- ----------- ------------
+
+    WRN   The optional metric smsp__pcsamp_sample_count could not be found. Collecting it as an additional metric could 
+          enable the rule to provide more guidance.                                                                     
+    ----- --------------------------------------------------------------------------------------------------------------
+    OPT   Est. Local Speedup: 35.14%                                                                                    
+          On average, each warp of this workload spends 4.6 cycles being stalled waiting on a fixed latency execution   
+          dependency. Typically, this stall reason should be very low and only shows up as a top contributor in         
+          already highly optimized kernels. Try to hide the corresponding instruction latencies by increasing the       
+          number of active warps, restructuring the code or unrolling loops. Furthermore, consider switching to         
+          lower-latency instructions, e.g. by making use of fast math compiler options. This stall type represents      
+          about 35.1% of the total average of 13.0 cycles between issuing two instructions.                             
+    ----- --------------------------------------------------------------------------------------------------------------
+    INF   Check the Warp Stall Sampling (All Samples) table for the top stall locations in your source based on         
+          sampling data. The Profiling Guide                                                                            
+          (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#metrics-reference) provides more details    
+          on each stall reason.                                                                                         
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           16
+    Block Limit Registers                 block            2
+    Block Limit Shared Mem                block            2
+    Block Limit Warps                     block            8
+    Theoretical Active Warps per SM        warp            8
+    Theoretical Occupancy                     %           25
+    Achieved Occupancy                        %        23.65
+    Achieved Active Warps Per SM           warp         7.57
+    ------------------------------- ----------- ------------
+
+    OPT   Est. Local Speedup: 75%                                                                                       
+          The 2.00 theoretical warps per scheduler this kernel can issue according to its occupancy are below the       
+          hardware maximum of 8. This kernel's theoretical occupancy (25.0%) is limited by the number of required       
+          registers, and the required amount of shared memory.                                                          
+
+  turing_h1688gemm_128x128_ldg8_nn (16, 16, 1)x(128, 1, 1), Context 1, Stream 7, Device 0, CC 7.5
+    Warning: Data collection happened without fixed GPU frequencies. Profiling results may be inconsistent.
+    Section: GPU Speed Of Light Throughput
+    ----------------------- ----------- ------------
+    Metric Name             Metric Unit Metric Value
+    ----------------------- ----------- ------------
+    DRAM Frequency                  Ghz         5.00
+    SM Frequency                    Ghz         1.40
+    Elapsed Cycles                cycle      567,682
+    Memory Throughput                 %        60.31
+    DRAM Throughput                   %        60.31
+    Duration                         us       403.81
+    L1/TEX Cache Throughput           %        80.33
+    L2 Cache Throughput               %        49.88
+    SM Active Cycles              cycle   516,239.72
+    Compute (SM) Throughput           %        74.47
+    ----------------------- ----------- ------------
+
+    OPT   Compute is more heavily utilized than Memory: Look at the Compute Workload Analysis section to see what the   
+          compute pipelines are spending their time doing. Also, consider whether any computation is redundant and      
+          could be reduced or moved to look-up tables.                                                                  
+
+    Section: Warp State Statistics
+    ---------------------------------------- ----------- ------------
+    Metric Name                              Metric Unit Metric Value
+    ---------------------------------------- ----------- ------------
+    Warp Cycles Per Issued Instruction             cycle        12.61
+    Warp Cycles Per Executed Instruction           cycle        12.61
+    Avg. Active Threads Per Warp                                   32
+    Avg. Not Predicated Off Threads Per Warp                    31.93
+    ---------------------------------------- ----------- ------------
+
+    WRN   The optional metric smsp__pcsamp_sample_count could not be found. Collecting it as an additional metric could 
+          enable the rule to provide more guidance.                                                                     
+    ----- --------------------------------------------------------------------------------------------------------------
+    OPT   Est. Local Speedup: 36.49%                                                                                    
+          On average, each warp of this workload spends 4.6 cycles being stalled waiting on a fixed latency execution   
+          dependency. Typically, this stall reason should be very low and only shows up as a top contributor in         
+          already highly optimized kernels. Try to hide the corresponding instruction latencies by increasing the       
+          number of active warps, restructuring the code or unrolling loops. Furthermore, consider switching to         
+          lower-latency instructions, e.g. by making use of fast math compiler options. This stall type represents      
+          about 36.5% of the total average of 12.6 cycles between issuing two instructions.                             
+    ----- --------------------------------------------------------------------------------------------------------------
+    INF   Check the Warp Stall Sampling (All Samples) table for the top stall locations in your source based on         
+          sampling data. The Profiling Guide                                                                            
+          (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#metrics-reference) provides more details    
+          on each stall reason.                                                                                         
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           16
+    Block Limit Registers                 block            2
+    Block Limit Shared Mem                block            2
+    Block Limit Warps                     block            8
+    Theoretical Active Warps per SM        warp            8
+    Theoretical Occupancy                     %           25
+    Achieved Occupancy                        %        23.66
+    Achieved Active Warps Per SM           warp         7.57
+    ------------------------------- ----------- ------------
+
+    OPT   Est. Local Speedup: 75%                                                                                       
+          The 2.00 theoretical warps per scheduler this kernel can issue according to its occupancy are below the       
+          hardware maximum of 8. This kernel's theoretical occupancy (25.0%) is limited by the number of required       
+          registers, and the required amount of shared memory.                                                          
+

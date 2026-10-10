@@ -1,25 +1,73 @@
 Attention forward, FP32, BH=16 (batch 2 x 8 heads), d=64, non-causal
-N=256    unfused (cuBLAS + softmax) |     0.212 ms |  1265.1 GFLOPS | score matrix     4.2 MB | PASS
-RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=256|0.2122|1265.10|GFLOPS|100.0|of unfused speed|PASS
-N=256    fused (FlashAttention-style)|     0.236 ms |  1137.9 GFLOPS | extra memory     0.0 MB | 0.90x vs unfused | err 1.2e-07 PASS
-RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=256|0.2359|1137.95|GFLOPS|89.9|of unfused speed|PASS
-N=1024   unfused (cuBLAS + softmax) |     1.923 ms |  2233.4 GFLOPS | score matrix    67.1 MB | PASS
-RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=1024|1.9231|2233.38|GFLOPS|100.0|of unfused speed|PASS
-N=1024   fused (FlashAttention-style)|     2.648 ms |  1621.8 GFLOPS | extra memory     0.0 MB | 0.73x vs unfused | err 1.9e-07 PASS
-RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=1024|2.6483|1621.80|GFLOPS|72.6|of unfused speed|PASS
-N=2048   unfused (cuBLAS + softmax) |     9.073 ms |  1893.5 GFLOPS | score matrix   268.4 MB | PASS
-RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=2048|9.0731|1893.49|GFLOPS|100.0|of unfused speed|PASS
-N=2048   fused (FlashAttention-style)|     9.260 ms |  1855.3 GFLOPS | extra memory     0.0 MB | 0.98x vs unfused | err 2.1e-07 PASS
-RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=2048|9.2599|1855.30|GFLOPS|98.0|of unfused speed|PASS
-N=4096   unfused (cuBLAS + softmax) |    43.006 ms |  1597.9 GFLOPS | score matrix  1073.7 MB | PASS
-RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=4096|43.0056|1597.92|GFLOPS|100.0|of unfused speed|PASS
-N=4096   fused (FlashAttention-style)|    28.811 ms |  2385.2 GFLOPS | extra memory     0.0 MB | 1.49x vs unfused | err 2.2e-07 PASS
-RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=4096|28.8105|2385.22|GFLOPS|149.3|of unfused speed|PASS
-N=8192   unfused (cuBLAS + softmax) |   196.597 ms |  1398.2 GFLOPS | score matrix  4295.0 MB | PASS
-RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=8192|196.5975|1398.18|GFLOPS|100.0|of unfused speed|PASS
-N=8192   fused (FlashAttention-style)|   112.180 ms |  2450.3 GFLOPS | extra memory     0.0 MB | 1.75x vs unfused | err 2.4e-07 PASS
-RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=8192|112.1796|2450.34|GFLOPS|175.3|of unfused speed|PASS
+N=256    unfused (cuBLAS + softmax) |     0.227 ms |  1180.8 GFLOPS | score matrix     4.2 MB | PASS
+RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=256|0.2273|1180.83|GFLOPS|100.0|of unfused speed|PASS
+N=256    fused (FlashAttention-style)|     0.259 ms |  1035.6 GFLOPS | extra memory     0.0 MB | 0.88x vs unfused | err 1.2e-07 PASS
+RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=256|0.2592|1035.58|GFLOPS|87.7|of unfused speed|PASS
+N=256    fused v2: 2 threads/row, 64 rows, tile 32 (128 thr)  |     0.172 ms |  1561.7 GFLOPS |  1.51x vs fused v1 | err 1.2e-07 vs CPU PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 2 threads/row, 64 rows, tile 32 (128 thr)|N=256|0.1719|1561.75|GFLOPS|132.3|of unfused speed|PASS
+N=256    fused v2: 4 threads/row, 64 rows, tile 32 (256 thr)  |     0.322 ms |   832.6 GFLOPS |  0.80x vs fused v1 | err 1.2e-07 vs CPU PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 4 threads/row, 64 rows, tile 32 (256 thr)|N=256|0.3224|832.57|GFLOPS|70.5|of unfused speed|PASS
+N=256    fused v2: 4 threads/row, 64 rows, tile 64 (256 thr)  |     0.332 ms |   809.1 GFLOPS |  0.78x vs fused v1 | err 1.2e-07 vs CPU PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 4 threads/row, 64 rows, tile 64 (256 thr)|N=256|0.3318|809.09|GFLOPS|68.5|of unfused speed|PASS
+N=256    fused v2: 2 threads/row, 128 rows, tile 32 (256 thr) |     0.168 ms |  1601.4 GFLOPS |  1.55x vs fused v1 | err 1.2e-07 vs CPU PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 2 threads/row, 128 rows, tile 32 (256 thr)|N=256|0.1676|1601.43|GFLOPS|135.6|of unfused speed|PASS
+N=1024   unfused (cuBLAS + softmax) |     2.031 ms |  2114.7 GFLOPS | score matrix    67.1 MB | PASS
+RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=1024|2.0310|2114.69|GFLOPS|100.0|of unfused speed|PASS
+N=1024   fused (FlashAttention-style)|     2.665 ms |  1611.5 GFLOPS | extra memory     0.0 MB | 0.76x vs unfused | err 1.9e-07 PASS
+RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=1024|2.6652|1611.47|GFLOPS|76.2|of unfused speed|PASS
+N=1024   fused v2: 2 threads/row, 64 rows, tile 32 (128 thr)  |     2.207 ms |  1946.5 GFLOPS |  1.21x vs fused v1 | err 1.8e-07 vs unfused PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 2 threads/row, 64 rows, tile 32 (128 thr)|N=1024|2.2065|1946.49|GFLOPS|92.0|of unfused speed|PASS
+N=1024   fused v2: 4 threads/row, 64 rows, tile 32 (256 thr)  |     4.317 ms |   994.9 GFLOPS |  0.62x vs fused v1 | err 1.9e-07 vs unfused PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 4 threads/row, 64 rows, tile 32 (256 thr)|N=1024|4.3172|994.86|GFLOPS|47.0|of unfused speed|PASS
+N=1024   fused v2: 4 threads/row, 64 rows, tile 64 (256 thr)  |     3.096 ms |  1387.1 GFLOPS |  0.86x vs fused v1 | err 1.9e-07 vs unfused PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 4 threads/row, 64 rows, tile 64 (256 thr)|N=1024|3.0964|1387.10|GFLOPS|65.6|of unfused speed|PASS
+N=1024   fused v2: 2 threads/row, 128 rows, tile 32 (256 thr) |     1.647 ms |  2608.1 GFLOPS |  1.62x vs fused v1 | err 1.8e-07 vs unfused PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 2 threads/row, 128 rows, tile 32 (256 thr)|N=1024|1.6468|2608.07|GFLOPS|123.3|of unfused speed|PASS
+N=2048   unfused (cuBLAS + softmax) |     7.584 ms |  2265.2 GFLOPS | score matrix   268.4 MB | PASS
+RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=2048|7.5844|2265.17|GFLOPS|100.0|of unfused speed|PASS
+N=2048   fused (FlashAttention-style)|     7.950 ms |  2161.0 GFLOPS | extra memory     0.0 MB | 0.95x vs unfused | err 2.1e-07 PASS
+RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=2048|7.9499|2161.01|GFLOPS|95.4|of unfused speed|PASS
+N=2048   fused v2: 2 threads/row, 64 rows, tile 32 (128 thr)  |     5.829 ms |  2947.1 GFLOPS |  1.36x vs fused v1 | err 2.2e-07 vs unfused PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 2 threads/row, 64 rows, tile 32 (128 thr)|N=2048|5.8294|2947.09|GFLOPS|130.1|of unfused speed|PASS
+N=2048   fused v2: 4 threads/row, 64 rows, tile 32 (256 thr)  |    10.983 ms |  1564.3 GFLOPS |  0.72x vs fused v1 | err 2.0e-07 vs unfused PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 4 threads/row, 64 rows, tile 32 (256 thr)|N=2048|10.9826|1564.28|GFLOPS|69.1|of unfused speed|PASS
+N=2048   fused v2: 4 threads/row, 64 rows, tile 64 (256 thr)  |    11.077 ms |  1550.9 GFLOPS |  0.72x vs fused v1 | err 2.0e-07 vs unfused PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 4 threads/row, 64 rows, tile 64 (256 thr)|N=2048|11.0772|1550.92|GFLOPS|68.5|of unfused speed|PASS
+N=2048   fused v2: 2 threads/row, 128 rows, tile 32 (256 thr) |     6.179 ms |  2780.4 GFLOPS |  1.29x vs fused v1 | err 2.2e-07 vs unfused PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 2 threads/row, 128 rows, tile 32 (256 thr)|N=2048|6.1790|2780.35|GFLOPS|122.7|of unfused speed|PASS
+N=4096   unfused (cuBLAS + softmax) |    36.288 ms |  1893.7 GFLOPS | score matrix  1073.7 MB | PASS
+RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=4096|36.2878|1893.74|GFLOPS|100.0|of unfused speed|PASS
+N=4096   fused (FlashAttention-style)|    26.349 ms |  2608.1 GFLOPS | extra memory     0.0 MB | 1.38x vs unfused | err 2.2e-07 PASS
+RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=4096|26.3490|2608.05|GFLOPS|137.7|of unfused speed|PASS
+N=4096   fused v2: 2 threads/row, 64 rows, tile 32 (128 thr)  |    25.305 ms |  2715.6 GFLOPS |  1.04x vs fused v1 | err 2.2e-07 vs unfused PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 2 threads/row, 64 rows, tile 32 (128 thr)|N=4096|25.3055|2715.59|GFLOPS|143.4|of unfused speed|PASS
+N=4096   fused v2: 4 threads/row, 64 rows, tile 32 (256 thr)  |    43.799 ms |  1569.0 GFLOPS |  0.60x vs fused v1 | err 2.2e-07 vs unfused PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 4 threads/row, 64 rows, tile 32 (256 thr)|N=4096|43.7989|1568.98|GFLOPS|82.9|of unfused speed|PASS
+N=4096   fused v2: 4 threads/row, 64 rows, tile 64 (256 thr)  |    44.914 ms |  1530.0 GFLOPS |  0.59x vs fused v1 | err 2.2e-07 vs unfused PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 4 threads/row, 64 rows, tile 64 (256 thr)|N=4096|44.9141|1530.02|GFLOPS|80.8|of unfused speed|PASS
+N=4096   fused v2: 2 threads/row, 128 rows, tile 32 (256 thr) |    25.006 ms |  2748.1 GFLOPS |  1.05x vs fused v1 | err 2.2e-07 vs unfused PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 2 threads/row, 128 rows, tile 32 (256 thr)|N=4096|25.0062|2748.10|GFLOPS|145.1|of unfused speed|PASS
+N=8192   unfused (cuBLAS + softmax) |   169.464 ms |  1622.0 GFLOPS | score matrix  4295.0 MB | PASS
+RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=8192|169.4643|1622.04|GFLOPS|100.0|of unfused speed|PASS
+N=8192   fused (FlashAttention-style)|   101.002 ms |  2721.5 GFLOPS | extra memory     0.0 MB | 1.68x vs unfused | err 2.4e-07 PASS
+RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=8192|101.0022|2721.50|GFLOPS|167.8|of unfused speed|PASS
+N=8192   fused v2: 2 threads/row, 64 rows, tile 32 (128 thr)  |   101.448 ms |  2709.5 GFLOPS |  1.00x vs fused v1 | err 2.4e-07 vs unfused PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 2 threads/row, 64 rows, tile 32 (128 thr)|N=8192|101.4484|2709.53|GFLOPS|167.0|of unfused speed|PASS
+N=8192   fused v2: 4 threads/row, 64 rows, tile 32 (256 thr)  |   174.859 ms |  1572.0 GFLOPS |  0.58x vs fused v1 | err 2.4e-07 vs unfused PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 4 threads/row, 64 rows, tile 32 (256 thr)|N=8192|174.8589|1572.00|GFLOPS|96.9|of unfused speed|PASS
+N=8192   fused v2: 4 threads/row, 64 rows, tile 64 (256 thr)  |   179.778 ms |  1529.0 GFLOPS |  0.56x vs fused v1 | err 2.3e-07 vs unfused PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 4 threads/row, 64 rows, tile 64 (256 thr)|N=8192|179.7778|1528.99|GFLOPS|94.3|of unfused speed|PASS
+N=8192   fused v2: 2 threads/row, 128 rows, tile 32 (256 thr) |   100.086 ms |  2746.4 GFLOPS |  1.01x vs fused v1 | err 2.4e-07 vs unfused PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 2 threads/row, 128 rows, tile 32 (256 thr)|N=8192|100.0861|2746.42|GFLOPS|169.3|of unfused speed|PASS
 N=16384  unfused (cuBLAS + softmax) | OUT OF MEMORY: score matrix needs 17.2 GB
 RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=16384|0|0|GFLOPS|0|of unfused speed|OOM (needs 17.2 GB for S)
-N=16384  fused (FlashAttention-style)|   453.550 ms |  2424.2 GFLOPS | extra memory     0.0 MB | (n/a) 0.00x vs unfused | err 0.0e+00 PASS (no reference: finite-check only)
-RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=16384|453.5495|2424.24|GFLOPS|0.0|of unfused speed|PASS
+N=16384  fused (FlashAttention-style)|   417.135 ms |  2635.9 GFLOPS | extra memory     0.0 MB | (n/a) 0.00x vs unfused | err 0.0e+00 PASS (no reference: finite-check only)
+RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=16384|417.1351|2635.86|GFLOPS|0.0|of unfused speed|PASS
+N=16384  fused v2: 2 threads/row, 64 rows, tile 32 (128 thr)  |   407.177 ms |  2700.3 GFLOPS |  1.02x vs fused v1 | err 3.6e-08 vs fused v1 PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 2 threads/row, 64 rows, tile 32 (128 thr)|N=16384|407.1769|2700.33|GFLOPS|0.0|of unfused speed|PASS
+N=16384  fused v2: 4 threads/row, 64 rows, tile 32 (256 thr)  |   698.513 ms |  1574.1 GFLOPS |  0.60x vs fused v1 | err 3.4e-08 vs fused v1 PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 4 threads/row, 64 rows, tile 32 (256 thr)|N=16384|698.5134|1574.07|GFLOPS|0.0|of unfused speed|PASS
+N=16384  fused v2: 4 threads/row, 64 rows, tile 64 (256 thr)  |   715.152 ms |  1537.5 GFLOPS |  0.58x vs fused v1 | err 3.4e-08 vs fused v1 PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 4 threads/row, 64 rows, tile 64 (256 thr)|N=16384|715.1520|1537.45|GFLOPS|0.0|of unfused speed|PASS
+N=16384  fused v2: 2 threads/row, 128 rows, tile 32 (256 thr) |   406.694 ms |  2703.5 GFLOPS |  1.03x vs fused v1 | err 3.6e-08 vs fused v1 PASS
+RESULT|Attention (BH=16, d=64)|fused v2: 2 threads/row, 128 rows, tile 32 (256 thr)|N=16384|406.6941|2703.53|GFLOPS|0.0|of unfused speed|PASS
