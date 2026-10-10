@@ -1,9 +1,5 @@
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-
-#define CHECK(x) do { cudaError_t e = (x); if (e != cudaSuccess) { \
-    printf("CUDA error: %s at %s:%d\n", cudaGetErrorString(e), __FILE__, __LINE__); exit(1); } } while (0)
+// Matrix transpose 4096x4096: the coalescing + bank-conflict lesson.
+#include "../../common/common.h"
 
 const int TILE = 32;   // each block handles a 32x32 tile
 const int ROWS = 8;    // block is 32x8 threads; each thread handles 4 elements
@@ -44,7 +40,7 @@ __global__ void transpose_tiled(float* out, const float* in, int n) {
 typedef void (*Kernel)(float*, const float*, int);
 
 int main(int argc, char** argv) {
-    bool profile = (argc > 1);                // "./transpose profile" -> run each kernel once
+    bool profile = profile_mode(argc, argv);  // "./transpose profile" -> run each kernel once
     int n = 4096;                             // must be a multiple of 32
     size_t bytes = (size_t)n * n * sizeof(float);
 
@@ -60,19 +56,13 @@ int main(int argc, char** argv) {
     Kernel kernels[] = {copy, transpose_naive, transpose_tiled<0>, transpose_tiled<1>};
     const char* names[] = {"copy (ceiling)  ", "naive           ", "tiled (conflicts)", "tiled + padded  "};
 
-    cudaEvent_t start, stop; cudaEventCreate(&start); cudaEventCreate(&stop);
-
     for (int k = 0; k < 4; k++) {
         CHECK(cudaMemset(d_out, 0, bytes));
         kernels[k]<<<grid, block>>>(d_out, d_in, n);               // warm-up
         CHECK(cudaGetLastError()); CHECK(cudaDeviceSynchronize());
         if (profile) continue;
 
-        int iters = 50;
-        cudaEventRecord(start);
-        for (int i = 0; i < iters; i++) kernels[k]<<<grid, block>>>(d_out, d_in, n);
-        cudaEventRecord(stop); cudaEventSynchronize(stop);
-        float ms; cudaEventElapsedTime(&ms, start, stop); ms /= iters;
+        float ms = time_ms([&]() { kernels[k]<<<grid, block>>>(d_out, d_in, n); }, 50);
 
         // Verify
         CHECK(cudaMemcpy(h_out, d_out, bytes, cudaMemcpyDeviceToHost));
@@ -85,7 +75,10 @@ int main(int argc, char** argv) {
 
         double gbps = 2.0 * bytes / (ms / 1e3) / 1e9;   // read + write
         printf("%s | %6.3f ms | %6.1f GB/s | %3.0f%% of peak | %s\n",
-               names[k], ms, gbps, gbps / 320.0 * 100, ok ? "PASS" : "FAIL");
+               names[k], ms, gbps, gbps / T4_PEAK_GBS * 100, ok ? "PASS" : "FAIL");
+        const char* ver[] = {"copy (ceiling)", "naive (uncoalesced writes)",
+                             "smem tiled [32][32] (bank conflicts)", "smem tiled [32][33] (padded)"};
+        report("Transpose", ver[k], "4096x4096", ms, gbps, "GB/s", gbps / T4_PEAK_GBS * 100, "of peak BW", ok);
     }
 
     cudaFree(d_in); cudaFree(d_out); free(h_in); free(h_out);

@@ -1,8 +1,5 @@
-#include <cstdio>
-#include <cstdlib>
-
-#define CHECK(x) do { cudaError_t e = (x); if (e != cudaSuccess) { \
-    printf("CUDA error: %s at %s:%d\n", cudaGetErrorString(e), __FILE__, __LINE__); exit(1); } } while (0)
+// Parallel reduction (sum of 16M floats): three versions, each faster than the last.
+#include "../../common/common.h"
 
 // ---------- v1: every thread does an atomicAdd to one global value ----------
 __global__ void reduce_atomic(const float* in, float* out, int n) {
@@ -51,7 +48,7 @@ __global__ void reduce_warp(const float* in, float* out, int n) {
 }
 
 // ---------- benchmark harness ----------
-float bench(int version, const float* d_in, float* d_out, int n, float* result) {
+float bench(int version, const float* d_in, float* d_out, int n, float* result, bool profile) {
     int threads = 256, blocks = (n + threads - 1) / threads;
     int sms; cudaDeviceGetAttribute(&sms, cudaDevAttrMultiProcessorCount, 0);
 
@@ -62,20 +59,20 @@ float bench(int version, const float* d_in, float* d_out, int n, float* result) 
         if (version == 3) reduce_warp<<<sms * 8, threads>>>(d_in, d_out, n);
     };
 
-    launch(); CHECK(cudaGetLastError()); CHECK(cudaDeviceSynchronize());   // warm-up
+    if (profile) {                             // one launch for Nsight Compute
+        launch(); CHECK(cudaGetLastError()); CHECK(cudaDeviceSynchronize());
+        return 0.0f;
+    }
 
-    cudaEvent_t start, stop; cudaEventCreate(&start); cudaEventCreate(&stop);
-    int iters = 20;
-    cudaEventRecord(start);
-    for (int i = 0; i < iters; i++) launch();
-    cudaEventRecord(stop); cudaEventSynchronize(stop);
-    float ms; cudaEventElapsedTime(&ms, start, stop);
+    // Note: the timed region includes a 4-byte cudaMemset per launch (negligible).
+    float ms = time_ms(launch, 20);
 
     CHECK(cudaMemcpy(result, d_out, sizeof(float), cudaMemcpyDeviceToHost));
-    return ms / iters;
+    return ms;
 }
 
-int main() {
+int main(int argc, char** argv) {
+    bool profile = profile_mode(argc, argv);
     int n = 1 << 24;                           // 16M floats
     size_t bytes = n * sizeof(float);
 
@@ -91,12 +88,16 @@ int main() {
     float base_ms = 0;
     for (int v = 1; v <= 3; v++) {
         float sum;
-        float ms = bench(v, d_in, d_out, n, &sum);
+        float ms = bench(v, d_in, d_out, n, &sum, profile);
+        if (profile) continue;
         if (v == 1) base_ms = ms;
         double gbps = bytes / (ms / 1e3) / 1e9;
         printf("%s | %8.3f ms | %6.1f GB/s | %3.0f%% of peak | %5.1fx vs v1 | sum=%.0f %s\n",
                names[v], ms, gbps, gbps / 320.0 * 100, base_ms / ms, sum,
                sum == expected ? "PASS" : "FAIL");
+        const char* ver[] = {"", "v1 atomicAdd per element", "v2 shared-mem tree", "v3 grid-stride + warp shuffle"};
+        report("Reduction (sum)", ver[v], "16M floats", ms, gbps, "GB/s", gbps / T4_PEAK_GBS * 100,
+               "of peak BW", sum == expected);
     }
 
     cudaFree(d_in); cudaFree(d_out); free(h_in);
