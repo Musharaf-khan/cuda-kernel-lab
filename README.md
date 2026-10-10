@@ -1,27 +1,108 @@
 # CUDA Kernel Lab
 
-Hand-written CUDA kernels, from naive to optimized, benchmarked and profiled.
+Hand-written CUDA kernels, each built from naive to optimized, benchmarked against cuBLAS and PyTorch, profiled with Nsight Compute, and placed on a measured roofline.
 
-**GPU:** NVIDIA Tesla T4 (Turing, sm_75, 320 GB/s peak memory bandwidth) on Google Colab
+**GPU:** NVIDIA Tesla T4 (Turing, sm_75, 40 SMs, 320 GB/s GDDR6, 8.1 TFLOP/s FP32 peak, 70 W cap) on Google Colab.
+
+## Highlights (measured)
+
+- **SGEMM: 61.8 → 3,098.7 GFLOPS (50x), reaching 82.7% of cuBLAS** at 4096³ with 2D register tiling (median of 3 runs; the v4/cuBLAS ratio held at 82.5–83.5% while absolute clocks drifted with temperature).
+- **Reduction: 128x faster** (1.9 → 248 GB/s, 78% of peak bandwidth) by replacing per-element atomics with a grid-stride loop and warp shuffles.
+- **Transpose: 16,252,928 → 0 shared-memory bank conflicts** (Nsight Compute counter) by padding the tile from `[32][32]` to `[32][33]`; the count is exactly 524,288 warp loads × 31 replays, and the fix gave 1.8x.
+- **Coalescing alone is worth 8.8x:** swapping two index lines in naive SGEMM took it from 61.8 to 543.7 GFLOPS.
+
+> Rows marked *pending* below were added after the first measurement session. Run [`run_all.ipynb`](run_all.ipynb) on a Colab T4 to fill them in; [`benchmarks/results.md`](benchmarks/results.md) is regenerated automatically from the raw output.
 
 ## Results
 
-| Kernel | Version | Size | Time | Throughput | % of peak | Bound |
-|---|---|---|---|---|---|---|
-| Vector add | naive | 16M floats | 0.767 ms | 262.6 GB/s | 82% | memory |
-| Reduction (sum) | v1 atomic | 16M floats | 34.672 ms | 1.9 GB/s | 1% | memory (atomic contention) |
-| Reduction (sum) | v2 shared-mem tree | 16M floats | 0.623 ms | 107.7 GB/s | 34% | memory (sync overhead) |
-| Reduction (sum) | v3 grid-stride + warp shuffle | 16M floats | 0.271 ms | 248.0 GB/s | 78% | memory |
-   | Transpose 4096² | copy (ceiling) | 64 MB | 0.561 ms | 239.0 GB/s | 75% | memory |
-   | Transpose 4096² | naive | 64 MB | 2.234 ms | 60.1 GB/s | 19% | memory (uncoalesced writes) |
-   | Transpose 4096² | tiled, smem [32][32] | 64 MB | 1.270 ms | 105.7 GB/s | 33% | shared-mem bank conflicts (16.25M) |
-   | Transpose 4096² | tiled, smem [32][33] | 64 MB | 0.705 ms | 190.3 GB/s | 59% | memory (0 bank conflicts) |
+| Kernel | Version | Size | Time | Throughput | vs baseline | Bound / limiter |
+|---|---|---|---:|---:|---:|---|
+| Vector add | naive | 16M floats | 0.767 ms | 262.6 GB/s | 82% of peak BW | memory |
+| Reduction (sum) | v1 `atomicAdd` per element | 16M floats | 34.672 ms | 1.9 GB/s | 1x | atomic contention on one address |
+| Reduction (sum) | v2 shared-memory tree | 16M floats | 0.623 ms | 107.7 GB/s | 56x | `__syncthreads` + idle threads |
+| Reduction (sum) | v3 grid-stride + warp shuffle | 16M floats | 0.271 ms | 248.0 GB/s | **128x** | memory (78% of peak) |
+| Transpose | copy (ceiling) | 4096² | 0.561 ms | 239.0 GB/s | — | memory |
+| Transpose | naive | 4096² | 2.234 ms | 60.1 GB/s | 1x | uncoalesced writes |
+| Transpose | smem tiled `[32][32]` | 4096² | 1.270 ms | 105.7 GB/s | 1.8x | 16.25M bank conflicts |
+| Transpose | smem tiled `[32][33]` | 4096² | 0.705 ms | 190.3 GB/s | **3.2x** | memory (0 conflicts, 80% of copy) |
+| SGEMM | v1 naive, uncoalesced | 4096³ | 2225.61 ms | 61.8 GFLOPS | 1.7% of cuBLAS | uncoalesced loads |
+| SGEMM | v2 naive, coalesced | 4096³ | 252.80 ms | 543.7 GFLOPS | 14.5% of cuBLAS | global memory |
+| SGEMM | v3 shared-memory tiled 32×32 | 4096³ | 164.01 ms | 838.0 GFLOPS | 22.4% of cuBLAS | shared-memory bandwidth (1 FMA / 2 loads) |
+| SGEMM | v4 2D register tiling, 8×8 per thread | 4096³ | 44.35 ms | 3,098.7 GFLOPS | **82.7% of cuBLAS** | FP32 compute (4 FMA / load) |
+| SGEMM | v5 v4 + `float4` + transposed A tile | 4096³ | *pending* | | | |
+| SGEMM | cuBLAS | 4096³ | 36.70 ms | 3,744.9 GFLOPS | 100% | FP32 compute |
+| Softmax | v1 → v4 (thread/row, 3-pass, online, register-cached) | 4096² | *pending* | | vs `torch.softmax` | memory |
+| LayerNorm | v1 → v3 (two-pass, Welford, register-cached) | 4096² | *pending* | | vs `F.layer_norm` | memory |
+| Residual add + LayerNorm | unfused vs fused | 4096² | *pending* | | | memory |
+| Attention (BH=16, d=64) | unfused cuBLAS vs fused FlashAttention-style | N = 1K…16K | *pending* | | vs PyTorch SDPA | |
 
-   ## Key learnings
-   - **Reduction:** replacing per-element atomics with grid-stride + warp shuffle gave 128x (1.9 → 248 GB/s).
-   - **Transpose:** padding the shared-memory tile from [32][32] to [32][33] eliminated 16,252,928 bank conflicts (= 524,288 warp loads × 31 replays, verified with Nsight Compute) and gave 1.8x.
+SGEMM rows are the median of 3 runs; every other row is one run of 20–100 timed launches after a warm-up. Throughput uses the *minimum* traffic an op needs (read inputs once, write outputs once), so it is directly comparable to the 320 GB/s spec.
 
-## Build and run
+## Roofline
+
+![Roofline](benchmarks/roofline.png)
+
+Every point is measured with Nsight Compute hardware counters, not estimated: FLOPs = `2·FFMA + FADD + FMUL` thread instructions, bytes = real DRAM reads + writes after the caches, time = `gpu__time_duration`. Generated by [`scripts/roofline.py`](scripts/roofline.py); the numbers behind it are in `benchmarks/roofline.csv`. *(The image appears after the first `run_all.ipynb` run.)*
+
+## What each kernel teaches
+
+| # | Kernel | Versions | The lesson |
+|---|---|---|---|
+| 01 | [Vector add](kernels/01_vecadd) | naive | Thread indexing, bounds guards, CUDA-event timing, bandwidth as the metric for memory-bound work. |
+| 02 | [Reduction](kernels/02_reduction) | atomic → shared tree → warp shuffle | Contention kills parallelism; do work in registers, reduce inside warps with `__shfl_xor_sync`/`__shfl_down_sync`. |
+| 03 | [Transpose](kernels/03_transpose) | naive → tiled → padded | Coalescing, shared-memory staging, bank conflicts and the `[32][33]` fix, proven with `ncu` counters. |
+| 04 | [SGEMM](kernels/04_gemm) | 5 versions + cuBLAS | Each fix exposes the next bottleneck: DRAM → shared memory → registers → instruction issue. |
+| 05 | [Softmax](kernels/05_softmax) | thread/row → 3-pass → online → registers | Numerical stability (max subtraction, with an overflow demo), online softmax, cutting memory passes 3 → 2 → 1. |
+| 06 | [LayerNorm](kernels/06_layernorm) | two-pass → Welford → registers, + fusion | Stable single-pass variance (Welford/Chan merge) and why fusing the residual add saves a full HBM round-trip. |
+| 07 | [Attention](kernels/07_attention) | unfused (cuBLAS) vs fused | FlashAttention's core idea: tile K/V through shared memory, keep scores in registers, fold them in with online softmax so the N×N matrix never exists (memory O(N²) → O(N)). |
+
+Deeper write-ups of each optimization: [`docs/learnings.md`](docs/learnings.md).
+
+## How correctness is verified
+
+A fast wrong kernel is worthless, so every benchmark checks its output before reporting a number:
+
+| Kernel | Reference | Tolerance |
+|---|---|---|
+| Vector add, reduction, transpose | exact expected values | bit-exact |
+| SGEMM | cuBLAS output (and cuBLAS itself vs a double-precision CPU GEMM at n = 256) | max rel. error < 1e-3 |
+| Softmax | double-precision CPU softmax | max **true** relative error < 1e-4 |
+| LayerNorm, add + LayerNorm | double-precision CPU reference | max \|a−b\| / (1+\|ref\|) < 1e-4 |
+| Attention | double-precision CPU attention at N = 256, unfused GPU result at larger N | < 1e-3 |
+
+The error check treats any NaN/Inf as a failure (a plain `fmaxf` silently ignores NaN and would report "PASS").
+
+## Run it
+
+**Colab (no local GPU needed):** open [`run_all.ipynb`](run_all.ipynb) in Colab, select the T4 runtime, Run all. It builds everything, runs every benchmark, the PyTorch baselines and the Nsight Compute counters, then produces `benchmarks/results.md`, `benchmarks/roofline.png` and a `results.zip`.
+
+**Any machine with an NVIDIA GPU and the CUDA toolkit:**
+
+```bash
+make                       # builds into build/ for sm_75; use make ARCH=sm_86 etc. for other GPUs
+bash scripts/run_all.sh    # everything, ~10-15 min on a T4
+./build/gemm 256           # quick correctness run (also checks cuBLAS vs CPU)
+./build/gemm 4096          # one GEMM benchmark
 ```
-nvcc -arch=sm_75 kernels/01_vecadd/vecadd_bench.cu -o vecadd_bench && ./vecadd_bench
+
+Single files still compile on their own, e.g. `nvcc -O3 -arch=sm_75 kernels/04_gemm/gemm.cu -o gemm -lcublas`.
+
+## Methodology
+
+- Kernels only: the timed region never includes host↔device copies.
+- Warm-up launch first, then the average of N launches with CUDA events.
+- Clocks drift on a shared, power-capped T4, so comparisons are made **within the same run** (cuBLAS is timed before *and* after our kernels and averaged) and GEMM is reported as the median of 3 runs.
+- Under Nsight Compute, `--clock-control none` keeps the GPU at its normal clocks so the roofline matches the benchmarks.
+
+## Layout
+
+```
+common/                 CHECK macro, timing, RESULT reporting, warp/block reductions
+kernels/01_vecadd .. 07_attention    one .cu per kernel family, every version + its benchmark + checks
+scripts/run_all.sh      the whole pipeline
+scripts/make_table.py   RESULT lines -> benchmarks/results.md
+scripts/roofline.py     ncu counters -> benchmarks/roofline.png / .csv
+scripts/torch_compare.py PyTorch baselines on identical shapes
+benchmarks/             raw logs, ncu reports, results.md, roofline
+docs/                   learnings, interview notes, blog draft
 ```

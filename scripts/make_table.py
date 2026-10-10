@@ -1,0 +1,72 @@
+"""Turn the RESULT|... lines printed by every benchmark into benchmarks/results.md.
+
+    python scripts/make_table.py benchmarks/raw  > benchmarks/results.md
+
+Rules
+- Lines are grouped by (kernel, size), in the order they first appear.
+- If the same (kernel, version, size) appears in several runs (e.g. GEMM run 3 times),
+  the run with the MEDIAN time is kept and the run count is noted.
+- "Speedup" is relative to the first version listed in that group (the baseline).
+"""
+import glob
+import os
+import statistics
+import sys
+from collections import OrderedDict
+
+
+def parse(raw_dir):
+    rows = []
+    for path in sorted(glob.glob(os.path.join(raw_dir, "*.txt"))):
+        with open(path, errors="replace") as f:
+            for line in f:
+                if not line.startswith("RESULT|"):
+                    continue
+                parts = line.rstrip("\n").split("|")
+                if len(parts) != 10:
+                    continue
+                _, kernel, version, size, ms, value, unit, pct, pct_of, status = parts
+                rows.append(dict(kernel=kernel, version=version, size=size, ms=float(ms), value=float(value),
+                                 unit=unit, pct=float(pct), pct_of=pct_of, status=status, src=os.path.basename(path)))
+    return rows
+
+
+def main():
+    raw_dir = sys.argv[1] if len(sys.argv) > 1 else "benchmarks/raw"
+    rows = parse(raw_dir)
+    if not rows:
+        print("_No RESULT lines found. Run scripts/run_all.sh on a GPU first._")
+        return
+
+    # (kernel, size) -> version -> [rows]
+    groups = OrderedDict()
+    for r in rows:
+        groups.setdefault((r["kernel"], r["size"]), OrderedDict()).setdefault(r["version"], []).append(r)
+
+    print("| Kernel | Size | Version | Time (ms) | Throughput | Speedup | % of | Check |")
+    print("|---|---|---|---:|---:|---:|---:|---|")
+    for (kernel, size), versions in groups.items():
+        base_ms = None
+        for version, runs in versions.items():
+            ok_runs = [r for r in runs if r["ms"] > 0]
+            if ok_runs:
+                med_ms = statistics.median_low([r["ms"] for r in ok_runs])
+                r = next(x for x in ok_runs if x["ms"] == med_ms)
+            else:
+                r = runs[0]
+            n = len(runs)
+            if base_ms is None and r["ms"] > 0:
+                base_ms = r["ms"]
+            if r["ms"] > 0:
+                speed = f"{base_ms / r['ms']:.2f}x" if base_ms else "-"
+                tp = f"{r['value']:,.1f} {r['unit']}"
+                ms = f"{r['ms']:.3f}"
+                pct = f"{r['pct']:.1f}% {r['pct_of']}" if r["pct_of"] != "-" else "-"
+            else:
+                speed, tp, ms, pct = "-", "-", "-", "-"
+            check = r["status"] + (f" (median of {n})" if n > 1 else "")
+            print(f"| {kernel} | {size} | {version} | {ms} | {tp} | {speed} | {pct} | {check} |")
+
+
+if __name__ == "__main__":
+    main()
