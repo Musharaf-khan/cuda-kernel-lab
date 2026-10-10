@@ -1,0 +1,13 @@
+SGEMM 4096x4096x4096
+v1 naive uncoalesced |  2226.33 ms |    61.7 GFLOPS |  0.8% of peak |   1.7% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v1 naive (uncoalesced)|4096^3|2226.3296|61.73|GFLOPS|1.7|of cuBLAS|PASS
+v2 naive coalesced   |   262.22 ms |   524.1 GFLOPS |  6.5% of peak |  14.7% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v2 naive (coalesced)|4096^3|262.2228|524.13|GFLOPS|14.7|of cuBLAS|PASS
+v3 smem tiled        |   168.67 ms |   814.9 GFLOPS | 10.1% of peak |  22.8% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v3 shared-mem tiled 32x32|4096^3|168.6676|814.85|GFLOPS|22.8|of cuBLAS|PASS
+v4 2D register tile  |    45.83 ms |  2999.0 GFLOPS | 37.0% of peak |  83.9% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v4 2D register tiling 8x8/thread|4096^3|45.8282|2999.00|GFLOPS|83.9|of cuBLAS|PASS
+v5 vectorized float4 |    42.72 ms |  3217.2 GFLOPS | 39.7% of peak |  90.0% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v5 v4 + float4 + transposed A tile|4096^3|42.7196|3217.23|GFLOPS|90.0|of cuBLAS|PASS
+cuBLAS               |    38.45 ms |  3574.7 GFLOPS | 44.1% of peak | (before 36.82 ms, after 40.07 ms)
+RESULT|SGEMM|cuBLAS (cublasSgemm)|4096^3|38.4480|3574.67|GFLOPS|100.0|of cuBLAS|PASS

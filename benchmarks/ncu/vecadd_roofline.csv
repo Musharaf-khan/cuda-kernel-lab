@@ -1,0 +1,10 @@
+==WARNING== Note: Running with unmodified GPU clocks. If not controlled otherwise, profiling results may be inconsistent.
+==PROF== Connected to process 1282 (/content/cuda-kernel-lab/build/vecadd_bench)
+==PROF== Disconnected from process 1282
+"ID","Process ID","Process Name","Host Name","Kernel Name","Context","Stream","Block Size","Grid Size","Device","CC","Section Name","Metric Name","Metric Unit","Metric Value"
+"0","1282","vecadd_bench","127.0.0.1","add(const float *, const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","7.5","Command line profiler metrics","dram__bytes_read.sum","byte","145,975,840"
+"0","1282","vecadd_bench","127.0.0.1","add(const float *, const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","7.5","Command line profiler metrics","dram__bytes_write.sum","byte","74,035,200"
+"0","1282","vecadd_bench","127.0.0.1","add(const float *, const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","7.5","Command line profiler metrics","gpu__time_duration.sum","ns","764,544"
+"0","1282","vecadd_bench","127.0.0.1","add(const float *, const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","7.5","Command line profiler metrics","sm__sass_thread_inst_executed_op_fadd_pred_on.sum","inst","16,777,216"
+"0","1282","vecadd_bench","127.0.0.1","add(const float *, const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","7.5","Command line profiler metrics","sm__sass_thread_inst_executed_op_ffma_pred_on.sum","inst","0"
+"0","1282","vecadd_bench","127.0.0.1","add(const float *, const float *, float *, int)","1","7","(256, 1, 1)","(65536, 1, 1)","0","7.5","Command line profiler metrics","sm__sass_thread_inst_executed_op_fmul_pred_on.sum","inst","0"

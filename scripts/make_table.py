@@ -46,7 +46,11 @@ def main():
     print("| Kernel | Size | Version | Time (ms) | Throughput | Speedup | % of | Check |")
     print("|---|---|---|---:|---:|---:|---:|---|")
     for (kernel, size), versions in groups.items():
-        base_ms = None
+        # Baseline = first version that isn't a "(ceiling)" reference. If the baseline didn't run
+        # (e.g. out of memory), there is no speedup to report for that group.
+        base_name = next((v for v in versions if "ceiling" not in v), None)
+        base_runs = [r for r in versions.get(base_name, []) if r["ms"] > 0]
+        base_ms = statistics.median_low([r["ms"] for r in base_runs]) if base_runs else None
         for version, runs in versions.items():
             ok_runs = [r for r in runs if r["ms"] > 0]
             if ok_runs:
@@ -55,16 +59,16 @@ def main():
             else:
                 r = runs[0]
             n = len(runs)
-            if base_ms is None and r["ms"] > 0:
-                base_ms = r["ms"]
             if r["ms"] > 0:
                 speed = f"{base_ms / r['ms']:.2f}x" if base_ms else "-"
                 tp = f"{r['value']:,.1f} {r['unit']}"
                 ms = f"{r['ms']:.3f}"
-                pct = f"{r['pct']:.1f}% {r['pct_of']}" if r["pct_of"] != "-" else "-"
+                pct = f"{r['pct']:.1f}% {r['pct_of']}" if r["pct_of"] != "-" and r["pct"] > 0 else "-"
             else:
                 speed, tp, ms, pct = "-", "-", "-", "-"
             check = r["status"] + (f" (median of {n})" if n > 1 else "")
+            if version.startswith("PyTorch"):
+                check = "baseline (timing only)"
             print(f"| {kernel} | {size} | {version} | {ms} | {tp} | {speed} | {pct} | {check} |")
 
 

@@ -94,7 +94,12 @@ def collect(ncu_dir):
     return out
 
 
-def plot(points, png):
+# Main chart: the full GEMM path, attention, and the best version of each memory-bound op.
+# Every memory-bound version is shown in the zoomed second chart.
+MAIN_MEMORY = {"Vector add", "Reduce v3 warp shuffle", "Softmax v4 registers", "LayerNorm v3 registers", "Add+LN fused"}
+
+
+def plot(points, png, xlim=(0.01, 1000), ylim=(1, 20000), title=None):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -108,13 +113,17 @@ def plot(points, png):
     ridge = PEAK_GFLOPS / PEAK_GBS
     ax.plot(xs, np.minimum(xs * PEAK_GBS, PEAK_GFLOPS), color=ink2, lw=2, zorder=1)
     ax.axvline(ridge, color=grid, lw=1, ls="--", zorder=0)
-    ax.text(0.012, 0.012 * PEAK_GBS * 1.25, f"memory roof  {PEAK_GBS:.0f} GB/s", color=ink2, fontsize=9,
-            rotation=33, rotation_mode="anchor")
-    ax.text(250, PEAK_GFLOPS * 1.12, f"FP32 roof  {PEAK_GFLOPS / 1000:.1f} TFLOP/s", color=ink2, fontsize=9, ha="right")
-    ax.text(ridge * 1.08, 2.0, f"ridge point\n{ridge:.1f} FLOP/byte", color=ink2, fontsize=8)
-
     ax.set_xscale("log"); ax.set_yscale("log")
-    ax.set_xlim(0.01, 1000); ax.set_ylim(1, 20000)
+    ax.set_xlim(*xlim); ax.set_ylim(*ylim)
+    x0 = xlim[0] * 1.3
+    if x0 * PEAK_GBS > ylim[0]:
+        ax.text(x0, x0 * PEAK_GBS * 1.3, f"memory roof  {PEAK_GBS:.0f} GB/s", color=ink2, fontsize=9,
+                rotation=33, rotation_mode="anchor")
+    if PEAK_GFLOPS < ylim[1]:
+        ax.text(xlim[1] / 4, PEAK_GFLOPS * 1.12, f"FP32 roof  {PEAK_GFLOPS / 1000:.1f} TFLOP/s", color=ink2,
+                fontsize=9, ha="right")
+    if xlim[0] < ridge < xlim[1]:
+        ax.text(ridge * 1.08, ylim[0] * 2, f"ridge point\n{ridge:.1f} FLOP/byte", color=ink2, fontsize=8)
     for fam, color in COLORS.items():
         fp = [p for p in points if p["family"] == fam]
         if not fp:
@@ -143,7 +152,7 @@ def plot(points, png):
 
     ax.set_xlabel("Arithmetic intensity (FLOP per DRAM byte, measured)", color=ink)
     ax.set_ylabel("Achieved performance (GFLOP/s, measured)", color=ink)
-    ax.set_title("CUDA Kernel Lab on a Tesla T4: every kernel on the roofline (Nsight Compute counters)",
+    ax.set_title(title or "CUDA Kernel Lab on a Tesla T4: measured roofline (Nsight Compute counters)",
                  color=ink, fontsize=11, loc="left")
     ax.grid(True, which="major", color=grid, lw=0.6)
     for s in ax.spines.values():
@@ -171,7 +180,12 @@ def main():
             bound = "memory" if p["oi"] < PEAK_GFLOPS / PEAK_GBS else "compute"
             w.writerow([p["label"], p["family"], f"{p['oi']:.3f}", f"{p['gflops']:.1f}", f"{p['gbs']:.1f}", bound])
             print(f"{p['label']:<26} OI {p['oi']:9.3f} FLOP/B  {p['gflops']:9.1f} GFLOP/s  {p['gbs']:7.1f} GB/s  {bound}")
-    plot(points, png)
+    main_pts = [p for p in points if p["family"] != FAMILY_DEFAULT or p["label"] in MAIN_MEMORY]
+    plot(main_pts, png)
+    mem = [p for p in points if p["family"] == FAMILY_DEFAULT]
+    if mem:
+        plot(mem, png.replace(".png", "_memory.png"), xlim=(0.05, 5), ylim=(10, 2000),
+             title="Memory-bound kernels, every version (zoom of the memory roof)")
 
 
 if __name__ == "__main__":

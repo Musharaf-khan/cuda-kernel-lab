@@ -1,0 +1,27 @@
+PyTorch 2.11.0+cu130 on Tesla T4
+softmax                     0.715 ms   187.8 GB/s
+RESULT|Softmax|PyTorch torch.softmax|4096x4096|0.7146|187.82|GB/s|58.7|of peak BW|PASS
+layer_norm                  0.806 ms   166.5 GB/s
+RESULT|LayerNorm|PyTorch F.layer_norm|4096x4096|0.8060|166.51|GB/s|52.0|of peak BW|PASS
+x + res, layer_norm         1.624 ms   165.3 GB/s (PyTorch eager = unfused)
+RESULT|Residual add + LayerNorm|PyTorch eager (x + res, F.layer_norm)|4096x4096|1.6235|165.34|GB/s|51.7|of peak BW|PASS
+torch.mm 4096^3            41.312 ms   3326.9 GFLOPS
+RESULT|SGEMM|PyTorch torch.mm (cuBLAS)|4096^3|41.3118|3326.87|GFLOPS|0.0|-|PASS
+SDPA N=1024                  1.657 ms   2592.8 GFLOPS
+RESULT|Attention (BH=16, d=64)|PyTorch F.scaled_dot_product_attention (FP32)|N=1024|1.6565|2592.76|GFLOPS|0.0|-|PASS
+naive torch N=1024           2.345 ms   1831.6 GFLOPS
+RESULT|Attention (BH=16, d=64)|PyTorch naive (matmul, softmax, matmul)|N=1024|2.3450|1831.55|GFLOPS|0.0|-|PASS
+SDPA N=2048                  6.356 ms   2702.7 GFLOPS
+RESULT|Attention (BH=16, d=64)|PyTorch F.scaled_dot_product_attention (FP32)|N=2048|6.3565|2702.74|GFLOPS|0.0|-|PASS
+naive torch N=2048          10.438 ms   1645.8 GFLOPS
+RESULT|Attention (BH=16, d=64)|PyTorch naive (matmul, softmax, matmul)|N=2048|10.4385|1645.82|GFLOPS|0.0|-|PASS
+SDPA N=4096                 25.637 ms   2680.4 GFLOPS
+RESULT|Attention (BH=16, d=64)|PyTorch F.scaled_dot_product_attention (FP32)|N=4096|25.6373|2680.45|GFLOPS|0.0|-|PASS
+naive torch N=4096          45.831 ms   1499.4 GFLOPS
+RESULT|Attention (BH=16, d=64)|PyTorch naive (matmul, softmax, matmul)|N=4096|45.8313|1499.40|GFLOPS|0.0|-|PASS
+SDPA N=8192                100.558 ms   2733.5 GFLOPS
+RESULT|Attention (BH=16, d=64)|PyTorch F.scaled_dot_product_attention (FP32)|N=8192|100.5582|2733.52|GFLOPS|0.0|-|PASS
+naive torch N=8192         197.297 ms   1393.2 GFLOPS
+RESULT|Attention (BH=16, d=64)|PyTorch naive (matmul, softmax, matmul)|N=8192|197.2971|1393.22|GFLOPS|0.0|-|PASS
+SDPA N=16384               411.922 ms   2669.2 GFLOPS
+RESULT|Attention (BH=16, d=64)|PyTorch F.scaled_dot_product_attention (FP32)|N=16384|411.9224|2669.22|GFLOPS|0.0|-|PASS

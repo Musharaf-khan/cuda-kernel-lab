@@ -1,0 +1,25 @@
+Attention forward, FP32, BH=16 (batch 2 x 8 heads), d=64, non-causal
+N=256    unfused (cuBLAS + softmax) |     0.212 ms |  1265.1 GFLOPS | score matrix     4.2 MB | PASS
+RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=256|0.2122|1265.10|GFLOPS|100.0|of unfused speed|PASS
+N=256    fused (FlashAttention-style)|     0.236 ms |  1137.9 GFLOPS | extra memory     0.0 MB | 0.90x vs unfused | err 1.2e-07 PASS
+RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=256|0.2359|1137.95|GFLOPS|89.9|of unfused speed|PASS
+N=1024   unfused (cuBLAS + softmax) |     1.923 ms |  2233.4 GFLOPS | score matrix    67.1 MB | PASS
+RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=1024|1.9231|2233.38|GFLOPS|100.0|of unfused speed|PASS
+N=1024   fused (FlashAttention-style)|     2.648 ms |  1621.8 GFLOPS | extra memory     0.0 MB | 0.73x vs unfused | err 1.9e-07 PASS
+RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=1024|2.6483|1621.80|GFLOPS|72.6|of unfused speed|PASS
+N=2048   unfused (cuBLAS + softmax) |     9.073 ms |  1893.5 GFLOPS | score matrix   268.4 MB | PASS
+RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=2048|9.0731|1893.49|GFLOPS|100.0|of unfused speed|PASS
+N=2048   fused (FlashAttention-style)|     9.260 ms |  1855.3 GFLOPS | extra memory     0.0 MB | 0.98x vs unfused | err 2.1e-07 PASS
+RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=2048|9.2599|1855.30|GFLOPS|98.0|of unfused speed|PASS
+N=4096   unfused (cuBLAS + softmax) |    43.006 ms |  1597.9 GFLOPS | score matrix  1073.7 MB | PASS
+RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=4096|43.0056|1597.92|GFLOPS|100.0|of unfused speed|PASS
+N=4096   fused (FlashAttention-style)|    28.811 ms |  2385.2 GFLOPS | extra memory     0.0 MB | 1.49x vs unfused | err 2.2e-07 PASS
+RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=4096|28.8105|2385.22|GFLOPS|149.3|of unfused speed|PASS
+N=8192   unfused (cuBLAS + softmax) |   196.597 ms |  1398.2 GFLOPS | score matrix  4295.0 MB | PASS
+RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=8192|196.5975|1398.18|GFLOPS|100.0|of unfused speed|PASS
+N=8192   fused (FlashAttention-style)|   112.180 ms |  2450.3 GFLOPS | extra memory     0.0 MB | 1.75x vs unfused | err 2.4e-07 PASS
+RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=8192|112.1796|2450.34|GFLOPS|175.3|of unfused speed|PASS
+N=16384  unfused (cuBLAS + softmax) | OUT OF MEMORY: score matrix needs 17.2 GB
+RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=16384|0|0|GFLOPS|0|of unfused speed|OOM (needs 17.2 GB for S)
+N=16384  fused (FlashAttention-style)|   453.550 ms |  2424.2 GFLOPS | extra memory     0.0 MB | (n/a) 0.00x vs unfused | err 0.0e+00 PASS (no reference: finite-check only)
+RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=16384|453.5495|2424.24|GFLOPS|0.0|of unfused speed|PASS

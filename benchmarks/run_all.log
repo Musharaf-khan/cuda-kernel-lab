@@ -1,0 +1,249 @@
+
+=================== GPU
+name, compute_cap, clocks.max.sm [MHz], memory.total [MiB], power.limit [W], driver_version
+Tesla T4, 7.5, 1590 MHz, 15360 MiB, 70.00 W, 580.82.07
+Cuda compilation tools, release 13.0, V13.0.88
+Build cuda_13.0.r13.0/compiler.36424714_0
+
+=================== Build (ARCH=sm_75)
+mkdir -p build
+nvcc -O3 -arch=sm_75 -lineinfo -std=c++17 kernels/01_vecadd/vecadd_bench.cu -o build/vecadd_bench
+nvcc -O3 -arch=sm_75 -lineinfo -std=c++17 kernels/02_reduction/reduction.cu -o build/reduction
+nvcc -O3 -arch=sm_75 -lineinfo -std=c++17 kernels/03_transpose/transpose.cu -o build/transpose
+nvcc -O3 -arch=sm_75 -lineinfo -std=c++17 kernels/04_gemm/gemm.cu -o build/gemm -lcublas
+nvcc -O3 -arch=sm_75 -lineinfo -std=c++17 kernels/05_softmax/softmax.cu -o build/softmax
+nvcc -O3 -arch=sm_75 -lineinfo -std=c++17 kernels/06_layernorm/layernorm.cu -o build/layernorm
+nvcc -O3 -arch=sm_75 -lineinfo -std=c++17 kernels/07_attention/attention.cu -o build/attention -lcublas
+
+=================== Benchmarks
+PASS | n=16777216 | 0.763 ms | 263.8 GB/s | 82% of T4 peak (320 GB/s)
+RESULT|Vector add|naive|16M floats|0.7632|263.81|GB/s|82.4|of peak BW|PASS
+v1 atomic       |   36.037 ms |    1.9 GB/s |   1% of peak |   1.0x vs v1 | sum=16777216 PASS
+RESULT|Reduction (sum)|v1 atomicAdd per element|16M floats|36.0373|1.86|GB/s|0.6|of peak BW|PASS
+v2 shared tree  |    0.625 ms |  107.5 GB/s |  34% of peak |  57.7x vs v1 | sum=16777216 PASS
+RESULT|Reduction (sum)|v2 shared-mem tree|16M floats|0.6245|107.46|GB/s|33.6|of peak BW|PASS
+v3 warp shuffle |    0.271 ms |  247.8 GB/s |  77% of peak | 133.1x vs v1 | sum=16777216 PASS
+RESULT|Reduction (sum)|v3 grid-stride + warp shuffle|16M floats|0.2708|247.81|GB/s|77.4|of peak BW|PASS
+copy (ceiling)   |  0.571 ms |  235.1 GB/s |  73% of peak | PASS
+RESULT|Transpose|copy (ceiling)|4096x4096|0.5709|235.09|GB/s|73.5|of peak BW|PASS
+naive            |  1.583 ms |   84.8 GB/s |  27% of peak | PASS
+RESULT|Transpose|naive (uncoalesced writes)|4096x4096|1.5827|84.80|GB/s|26.5|of peak BW|PASS
+tiled (conflicts) |  0.732 ms |  183.4 GB/s |  57% of peak | PASS
+RESULT|Transpose|smem tiled [32][32] (bank conflicts)|4096x4096|0.7317|183.44|GB/s|57.3|of peak BW|PASS
+tiled + padded   |  0.692 ms |  193.9 GB/s |  61% of peak | PASS
+RESULT|Transpose|smem tiled [32][33] (padded)|4096x4096|0.6923|193.87|GB/s|60.6|of peak BW|PASS
+cuBLAS vs CPU (double) reference: max rel err 2.1e-06 PASS
+SGEMM 256x256x256
+v1 naive uncoalesced |     0.69 ms |    48.8 GFLOPS |  0.6% of peak |   3.5% of cuBLAS | err 4.6e-06 PASS
+RESULT|SGEMM|v1 naive (uncoalesced)|256^3|0.6877|48.79|GFLOPS|3.5|of cuBLAS|PASS
+v2 naive coalesced   |     0.05 ms |   677.2 GFLOPS |  8.4% of peak |  48.9% of cuBLAS | err 4.6e-06 PASS
+RESULT|SGEMM|v2 naive (coalesced)|256^3|0.0495|677.20|GFLOPS|48.9|of cuBLAS|PASS
+v3 smem tiled        |     0.04 ms |   845.4 GFLOPS | 10.4% of peak |  61.1% of cuBLAS | err 4.6e-06 PASS
+RESULT|SGEMM|v3 shared-mem tiled 32x32|256^3|0.0397|845.42|GFLOPS|61.1|of cuBLAS|PASS
+v4 2D register tile  |     0.07 ms |   454.3 GFLOPS |  5.6% of peak |  32.8% of cuBLAS | err 4.6e-06 PASS
+RESULT|SGEMM|v4 2D register tiling 8x8/thread|256^3|0.0739|454.30|GFLOPS|32.8|of cuBLAS|PASS
+v5 vectorized float4 |     0.06 ms |   538.9 GFLOPS |  6.7% of peak |  38.9% of cuBLAS | err 4.6e-06 PASS
+RESULT|SGEMM|v5 v4 + float4 + transposed A tile|256^3|0.0623|538.95|GFLOPS|38.9|of cuBLAS|PASS
+cuBLAS               |     0.02 ms |  1384.2 GFLOPS | 17.1% of peak | (before 0.02 ms, after 0.03 ms)
+RESULT|SGEMM|cuBLAS (cublasSgemm)|256^3|0.0242|1384.21|GFLOPS|100.0|of cuBLAS|PASS
+SGEMM 4096x4096x4096
+v1 naive uncoalesced |  2226.33 ms |    61.7 GFLOPS |  0.8% of peak |   1.7% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v1 naive (uncoalesced)|4096^3|2226.3296|61.73|GFLOPS|1.7|of cuBLAS|PASS
+v2 naive coalesced   |   262.22 ms |   524.1 GFLOPS |  6.5% of peak |  14.7% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v2 naive (coalesced)|4096^3|262.2228|524.13|GFLOPS|14.7|of cuBLAS|PASS
+v3 smem tiled        |   168.67 ms |   814.9 GFLOPS | 10.1% of peak |  22.8% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v3 shared-mem tiled 32x32|4096^3|168.6676|814.85|GFLOPS|22.8|of cuBLAS|PASS
+v4 2D register tile  |    45.83 ms |  2999.0 GFLOPS | 37.0% of peak |  83.9% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v4 2D register tiling 8x8/thread|4096^3|45.8282|2999.00|GFLOPS|83.9|of cuBLAS|PASS
+v5 vectorized float4 |    42.72 ms |  3217.2 GFLOPS | 39.7% of peak |  90.0% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v5 v4 + float4 + transposed A tile|4096^3|42.7196|3217.23|GFLOPS|90.0|of cuBLAS|PASS
+cuBLAS               |    38.45 ms |  3574.7 GFLOPS | 44.1% of peak | (before 36.82 ms, after 40.07 ms)
+RESULT|SGEMM|cuBLAS (cublasSgemm)|4096^3|38.4480|3574.67|GFLOPS|100.0|of cuBLAS|PASS
+SGEMM 4096x4096x4096
+v1 naive uncoalesced |  2226.03 ms |    61.7 GFLOPS |  0.8% of peak |   1.8% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v1 naive (uncoalesced)|4096^3|2226.0349|61.74|GFLOPS|1.8|of cuBLAS|PASS
+v2 naive coalesced   |   271.71 ms |   505.8 GFLOPS |  6.2% of peak |  15.1% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v2 naive (coalesced)|4096^3|271.7079|505.83|GFLOPS|15.1|of cuBLAS|PASS
+v3 smem tiled        |   177.12 ms |   776.0 GFLOPS |  9.6% of peak |  23.2% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v3 shared-mem tiled 32x32|4096^3|177.1172|775.98|GFLOPS|23.2|of cuBLAS|PASS
+v4 2D register tile  |    48.37 ms |  2841.5 GFLOPS | 35.1% of peak |  85.1% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v4 2D register tiling 8x8/thread|4096^3|48.3693|2841.45|GFLOPS|85.1|of cuBLAS|PASS
+v5 vectorized float4 |    44.31 ms |  3101.6 GFLOPS | 38.3% of peak |  92.9% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v5 v4 + float4 + transposed A tile|4096^3|44.3120|3101.62|GFLOPS|92.9|of cuBLAS|PASS
+cuBLAS               |    41.15 ms |  3339.8 GFLOPS | 41.2% of peak | (before 40.58 ms, after 41.72 ms)
+RESULT|SGEMM|cuBLAS (cublasSgemm)|4096^3|41.1523|3339.76|GFLOPS|100.0|of cuBLAS|PASS
+SGEMM 4096x4096x4096
+v1 naive uncoalesced |  2249.58 ms |    61.1 GFLOPS |  0.8% of peak |   1.9% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v1 naive (uncoalesced)|4096^3|2249.5796|61.10|GFLOPS|1.9|of cuBLAS|PASS
+v2 naive coalesced   |   281.78 ms |   487.7 GFLOPS |  6.0% of peak |  15.4% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v2 naive (coalesced)|4096^3|281.7827|487.75|GFLOPS|15.4|of cuBLAS|PASS
+v3 smem tiled        |   182.62 ms |   752.6 GFLOPS |  9.3% of peak |  23.8% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v3 shared-mem tiled 32x32|4096^3|182.6190|752.60|GFLOPS|23.8|of cuBLAS|PASS
+v4 2D register tile  |    49.96 ms |  2750.7 GFLOPS | 34.0% of peak |  86.9% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v4 2D register tiling 8x8/thread|4096^3|49.9642|2750.75|GFLOPS|86.9|of cuBLAS|PASS
+v5 vectorized float4 |    47.42 ms |  2898.6 GFLOPS | 35.8% of peak |  91.6% of cuBLAS | err 0.0e+00 PASS
+RESULT|SGEMM|v5 v4 + float4 + transposed A tile|4096^3|47.4161|2898.57|GFLOPS|91.6|of cuBLAS|PASS
+cuBLAS               |    43.43 ms |  3164.5 GFLOPS | 39.1% of peak | (before 41.85 ms, after 45.01 ms)
+RESULT|SGEMM|cuBLAS (cublasSgemm)|4096^3|43.4312|3164.52|GFLOPS|100.0|of cuBLAS|PASS
+Stability check, logits in [90,110]: no max-subtraction -> 262144/262144 NaN/Inf outputs; stable v4 -> 0 NaN/Inf
+Softmax 4096 x 4096 (FP32)
+v1 thread-per-row, 3 passes            |    4.579 ms |   29.3 GB/s |   9% of peak |    1.0x vs v1 | err 4.3e-06 PASS
+RESULT|Softmax|v1 thread-per-row, 3 passes|4096x4096|4.5789|29.31|GB/s|9.2|of peak BW|PASS
+v2 block-per-row, 3 passes             |    0.746 ms |  180.0 GB/s |  56% of peak |    6.1x vs v1 | err 1.1e-06 PASS
+RESULT|Softmax|v2 block-per-row, 3 passes|4096x4096|0.7456|180.01|GB/s|56.3|of peak BW|PASS
+v3 online softmax, 2 passes            |    0.751 ms |  178.7 GB/s |  56% of peak |    6.1x vs v1 | err 1.2e-06 PASS
+RESULT|Softmax|v3 online softmax, 2 passes|4096x4096|0.7509|178.75|GB/s|55.9|of peak BW|PASS
+v4 register-cached, 1 pass (float4)    |    0.573 ms |  234.1 GB/s |  73% of peak |    8.0x vs v1 | err 1.1e-06 PASS
+RESULT|Softmax|v4 register-cached, 1 pass (float4)|4096x4096|0.5732|234.14|GB/s|73.2|of peak BW|PASS
+LayerNorm 4096 x 4096 (FP32)
+v1 two-pass (3 reads)                      |   0.870 ms |  154.3 GB/s |  48% of peak |  1.00x vs v1 | err 3.2e-07 PASS
+RESULT|LayerNorm|v1 two-pass (3 reads)|4096x4096|0.8696|154.34|GB/s|48.2|of peak BW|PASS
+v2 Welford single-pass stats (2 reads)     |   0.816 ms |  164.5 GB/s |  51% of peak |  1.07x vs v1 | err 3.0e-07 PASS
+RESULT|LayerNorm|v2 Welford single-pass stats (2 reads)|4096x4096|0.8159|164.49|GB/s|51.4|of peak BW|PASS
+v3 register-cached (1 read, float4)        |   0.568 ms |  236.1 GB/s |  74% of peak |  1.53x vs v1 | err 2.9e-07 PASS
+RESULT|LayerNorm|v3 register-cached (1 read, float4)|4096x4096|0.5684|236.11|GB/s|73.8|of peak BW|PASS
+unfused: add kernel + LayerNorm kernel     |   1.370 ms |  195.9 GB/s |  1.00x vs unfused | err 2.7e-07 PASS
+RESULT|Residual add + LayerNorm|unfused: add kernel + LayerNorm kernel|4096x4096|1.3703|195.89|GB/s|61.2|of peak BW|PASS
+fused: add + LayerNorm in one kernel       |   1.127 ms |  238.2 GB/s |  1.22x vs unfused | err 2.7e-07 PASS
+RESULT|Residual add + LayerNorm|fused: add + LayerNorm in one kernel|4096x4096|1.1270|238.18|GB/s|74.4|of peak BW|PASS
+Attention forward, FP32, BH=16 (batch 2 x 8 heads), d=64, non-causal
+N=256    unfused (cuBLAS + softmax) |     0.212 ms |  1265.1 GFLOPS | score matrix     4.2 MB | PASS
+RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=256|0.2122|1265.10|GFLOPS|100.0|of unfused speed|PASS
+N=256    fused (FlashAttention-style)|     0.236 ms |  1137.9 GFLOPS | extra memory     0.0 MB | 0.90x vs unfused | err 1.2e-07 PASS
+RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=256|0.2359|1137.95|GFLOPS|89.9|of unfused speed|PASS
+N=1024   unfused (cuBLAS + softmax) |     1.923 ms |  2233.4 GFLOPS | score matrix    67.1 MB | PASS
+RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=1024|1.9231|2233.38|GFLOPS|100.0|of unfused speed|PASS
+N=1024   fused (FlashAttention-style)|     2.648 ms |  1621.8 GFLOPS | extra memory     0.0 MB | 0.73x vs unfused | err 1.9e-07 PASS
+RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=1024|2.6483|1621.80|GFLOPS|72.6|of unfused speed|PASS
+N=2048   unfused (cuBLAS + softmax) |     9.073 ms |  1893.5 GFLOPS | score matrix   268.4 MB | PASS
+RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=2048|9.0731|1893.49|GFLOPS|100.0|of unfused speed|PASS
+N=2048   fused (FlashAttention-style)|     9.260 ms |  1855.3 GFLOPS | extra memory     0.0 MB | 0.98x vs unfused | err 2.1e-07 PASS
+RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=2048|9.2599|1855.30|GFLOPS|98.0|of unfused speed|PASS
+N=4096   unfused (cuBLAS + softmax) |    43.006 ms |  1597.9 GFLOPS | score matrix  1073.7 MB | PASS
+RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=4096|43.0056|1597.92|GFLOPS|100.0|of unfused speed|PASS
+N=4096   fused (FlashAttention-style)|    28.811 ms |  2385.2 GFLOPS | extra memory     0.0 MB | 1.49x vs unfused | err 2.2e-07 PASS
+RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=4096|28.8105|2385.22|GFLOPS|149.3|of unfused speed|PASS
+N=8192   unfused (cuBLAS + softmax) |   196.597 ms |  1398.2 GFLOPS | score matrix  4295.0 MB | PASS
+RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=8192|196.5975|1398.18|GFLOPS|100.0|of unfused speed|PASS
+N=8192   fused (FlashAttention-style)|   112.180 ms |  2450.3 GFLOPS | extra memory     0.0 MB | 1.75x vs unfused | err 2.4e-07 PASS
+RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=8192|112.1796|2450.34|GFLOPS|175.3|of unfused speed|PASS
+N=16384  unfused (cuBLAS + softmax) | OUT OF MEMORY: score matrix needs 17.2 GB
+RESULT|Attention (BH=16, d=64)|unfused: cuBLAS QK^T + softmax + cuBLAS PV|N=16384|0|0|GFLOPS|0|of unfused speed|OOM (needs 17.2 GB for S)
+N=16384  fused (FlashAttention-style)|   453.550 ms |  2424.2 GFLOPS | extra memory     0.0 MB | (n/a) 0.00x vs unfused | err 0.0e+00 PASS (no reference: finite-check only)
+RESULT|Attention (BH=16, d=64)|fused: FlashAttention-style (online softmax, tiled K/V)|N=16384|453.5495|2424.24|GFLOPS|0.0|of unfused speed|PASS
+
+=================== PyTorch baselines
+PyTorch 2.11.0+cu130 on Tesla T4
+softmax                     0.715 ms   187.8 GB/s
+RESULT|Softmax|PyTorch torch.softmax|4096x4096|0.7146|187.82|GB/s|58.7|of peak BW|PASS
+layer_norm                  0.806 ms   166.5 GB/s
+RESULT|LayerNorm|PyTorch F.layer_norm|4096x4096|0.8060|166.51|GB/s|52.0|of peak BW|PASS
+x + res, layer_norm         1.624 ms   165.3 GB/s (PyTorch eager = unfused)
+RESULT|Residual add + LayerNorm|PyTorch eager (x + res, F.layer_norm)|4096x4096|1.6235|165.34|GB/s|51.7|of peak BW|PASS
+torch.mm 4096^3            41.312 ms   3326.9 GFLOPS
+RESULT|SGEMM|PyTorch torch.mm (cuBLAS)|4096^3|41.3118|3326.87|GFLOPS|0.0|-|PASS
+SDPA N=1024                  1.657 ms   2592.8 GFLOPS
+RESULT|Attention (BH=16, d=64)|PyTorch F.scaled_dot_product_attention (FP32)|N=1024|1.6565|2592.76|GFLOPS|0.0|-|PASS
+naive torch N=1024           2.345 ms   1831.6 GFLOPS
+RESULT|Attention (BH=16, d=64)|PyTorch naive (matmul, softmax, matmul)|N=1024|2.3450|1831.55|GFLOPS|0.0|-|PASS
+SDPA N=2048                  6.356 ms   2702.7 GFLOPS
+RESULT|Attention (BH=16, d=64)|PyTorch F.scaled_dot_product_attention (FP32)|N=2048|6.3565|2702.74|GFLOPS|0.0|-|PASS
+naive torch N=2048          10.438 ms   1645.8 GFLOPS
+RESULT|Attention (BH=16, d=64)|PyTorch naive (matmul, softmax, matmul)|N=2048|10.4385|1645.82|GFLOPS|0.0|-|PASS
+SDPA N=4096                 25.637 ms   2680.4 GFLOPS
+RESULT|Attention (BH=16, d=64)|PyTorch F.scaled_dot_product_attention (FP32)|N=4096|25.6373|2680.45|GFLOPS|0.0|-|PASS
+naive torch N=4096          45.831 ms   1499.4 GFLOPS
+RESULT|Attention (BH=16, d=64)|PyTorch naive (matmul, softmax, matmul)|N=4096|45.8313|1499.40|GFLOPS|0.0|-|PASS
+SDPA N=8192                100.558 ms   2733.5 GFLOPS
+RESULT|Attention (BH=16, d=64)|PyTorch F.scaled_dot_product_attention (FP32)|N=8192|100.5582|2733.52|GFLOPS|0.0|-|PASS
+naive torch N=8192         197.297 ms   1393.2 GFLOPS
+RESULT|Attention (BH=16, d=64)|PyTorch naive (matmul, softmax, matmul)|N=8192|197.2971|1393.22|GFLOPS|0.0|-|PASS
+SDPA N=16384               411.922 ms   2669.2 GFLOPS
+RESULT|Attention (BH=16, d=64)|PyTorch F.scaled_dot_product_attention (FP32)|N=16384|411.9224|2669.22|GFLOPS|0.0|-|PASS
+
+=================== Nsight Compute: roofline counters (one launch per kernel)
+-- vecadd
+-- reduction
+-- gemm
+-- softmax
+-- layernorm
+-- attention
+-- transpose bank conflicts
+-- full report for GEMM v4 vs v5 (open the .ncu-rep in the Nsight Compute GUI)
+
+=================== Tables and roofline
+wrote benchmarks/results.md
+Vector add                 OI     0.076 FLOP/B       21.9 GFLOP/s    287.8 GB/s  memory
+Reduce v2 smem tree        OI     0.201 FLOP/B       23.5 GFLOP/s    117.0 GB/s  memory
+Reduce v3 warp shuffle     OI     0.205 FLOP/B       61.4 GFLOP/s    299.6 GB/s  memory
+GEMM v1 naive              OI     7.678 FLOP/B       59.4 GFLOP/s      7.7 GB/s  memory
+GEMM v2 coalesced          OI    10.249 FLOP/B      690.4 GFLOP/s     67.4 GB/s  memory
+GEMM v3 smem tiled         OI    10.696 FLOP/B     1028.8 GFLOP/s     96.2 GB/s  memory
+GEMM v4 register tiled     OI    77.939 FLOP/B     3891.8 GFLOP/s     49.9 GB/s  compute
+GEMM v5 vectorized         OI    83.747 FLOP/B     4697.0 GFLOP/s     56.1 GB/s  compute
+cuBLAS                     OI    54.386 FLOP/B     6864.7 GFLOP/s    126.2 GB/s  compute
+Softmax v1 thread/row      OI     0.153 FLOP/B       20.6 GFLOP/s    134.4 GB/s  memory
+Softmax v2 3-pass          OI     0.663 FLOP/B      146.1 GFLOP/s    220.3 GB/s  memory
+Softmax v3 online          OI     0.763 FLOP/B      203.8 GFLOP/s    267.3 GB/s  memory
+Softmax v4 registers       OI     0.517 FLOP/B      138.5 GFLOP/s    267.8 GB/s  memory
+LayerNorm v1 two-pass      OI     0.982 FLOP/B      197.9 GFLOP/s    201.5 GB/s  memory
+LayerNorm v2 Welford       OI     2.475 FLOP/B      639.6 GFLOP/s    258.4 GB/s  memory
+LayerNorm v3 registers     OI     0.971 FLOP/B      260.7 GFLOP/s    268.4 GB/s  memory
+Add+LN unfused             OI     0.437 FLOP/B      119.7 GFLOP/s    274.2 GB/s  memory
+Add+LN fused               OI     0.538 FLOP/B      145.2 GFLOP/s    269.7 GB/s  memory
+Attention fused            OI   300.965 FLOP/B     2049.2 GFLOP/s      6.8 GB/s  compute
+Attention unfused          OI    11.757 FLOP/B     2965.6 GFLOP/s    252.2 GB/s  memory
+wrote benchmarks/roofline.png
+
+=================== Summary
+PASS: 59   FAIL: 0
+| Kernel | Size | Version | Time (ms) | Throughput | Speedup | % of | Check |
+|---|---|---|---:|---:|---:|---:|---|
+| Vector add | 16M floats | naive | 0.763 | 263.8 GB/s | 1.00x | 82.4% of peak BW | PASS |
+| Reduction (sum) | 16M floats | v1 atomicAdd per element | 36.037 | 1.9 GB/s | 1.00x | 0.6% of peak BW | PASS |
+| Reduction (sum) | 16M floats | v2 shared-mem tree | 0.625 | 107.5 GB/s | 57.71x | 33.6% of peak BW | PASS |
+| Reduction (sum) | 16M floats | v3 grid-stride + warp shuffle | 0.271 | 247.8 GB/s | 133.08x | 77.4% of peak BW | PASS |
+| Transpose | 4096x4096 | copy (ceiling) | 0.571 | 235.1 GB/s | 1.00x | 73.5% of peak BW | PASS |
+| Transpose | 4096x4096 | naive (uncoalesced writes) | 1.583 | 84.8 GB/s | 0.36x | 26.5% of peak BW | PASS |
+| Transpose | 4096x4096 | smem tiled [32][32] (bank conflicts) | 0.732 | 183.4 GB/s | 0.78x | 57.3% of peak BW | PASS |
+| Transpose | 4096x4096 | smem tiled [32][33] (padded) | 0.692 | 193.9 GB/s | 0.82x | 60.6% of peak BW | PASS |
+| SGEMM | 4096^3 | v1 naive (uncoalesced) | 2226.330 | 61.7 GFLOPS | 1.00x | 1.7% of cuBLAS | PASS (median of 3) |
+| SGEMM | 4096^3 | v2 naive (coalesced) | 271.708 | 505.8 GFLOPS | 8.19x | 15.1% of cuBLAS | PASS (median of 3) |
+| SGEMM | 4096^3 | v3 shared-mem tiled 32x32 | 177.117 | 776.0 GFLOPS | 12.57x | 23.2% of cuBLAS | PASS (median of 3) |
+| SGEMM | 4096^3 | v4 2D register tiling 8x8/thread | 48.369 | 2,841.4 GFLOPS | 46.03x | 85.1% of cuBLAS | PASS (median of 3) |
+| SGEMM | 4096^3 | v5 v4 + float4 + transposed A tile | 44.312 | 3,101.6 GFLOPS | 50.24x | 92.9% of cuBLAS | PASS (median of 3) |
+| SGEMM | 4096^3 | cuBLAS (cublasSgemm) | 41.152 | 3,339.8 GFLOPS | 54.10x | 100.0% of cuBLAS | PASS (median of 3) |
+| SGEMM | 4096^3 | PyTorch torch.mm (cuBLAS) | 41.312 | 3,326.9 GFLOPS | 53.89x | - | PASS |
+| Softmax | 4096x4096 | v1 thread-per-row, 3 passes | 4.579 | 29.3 GB/s | 1.00x | 9.2% of peak BW | PASS |
+| Softmax | 4096x4096 | v2 block-per-row, 3 passes | 0.746 | 180.0 GB/s | 6.14x | 56.3% of peak BW | PASS |
+| Softmax | 4096x4096 | v3 online softmax, 2 passes | 0.751 | 178.8 GB/s | 6.10x | 55.9% of peak BW | PASS |
+| Softmax | 4096x4096 | v4 register-cached, 1 pass (float4) | 0.573 | 234.1 GB/s | 7.99x | 73.2% of peak BW | PASS |
+| Softmax | 4096x4096 | PyTorch torch.softmax | 0.715 | 187.8 GB/s | 6.41x | 58.7% of peak BW | PASS |
+| LayerNorm | 4096x4096 | v1 two-pass (3 reads) | 0.870 | 154.3 GB/s | 1.00x | 48.2% of peak BW | PASS |
+| LayerNorm | 4096x4096 | v2 Welford single-pass stats (2 reads) | 0.816 | 164.5 GB/s | 1.07x | 51.4% of peak BW | PASS |
+| LayerNorm | 4096x4096 | v3 register-cached (1 read, float4) | 0.568 | 236.1 GB/s | 1.53x | 73.8% of peak BW | PASS |
+| LayerNorm | 4096x4096 | PyTorch F.layer_norm | 0.806 | 166.5 GB/s | 1.08x | 52.0% of peak BW | PASS |
+| Residual add + LayerNorm | 4096x4096 | unfused: add kernel + LayerNorm kernel | 1.370 | 195.9 GB/s | 1.00x | 61.2% of peak BW | PASS |
+| Residual add + LayerNorm | 4096x4096 | fused: add + LayerNorm in one kernel | 1.127 | 238.2 GB/s | 1.22x | 74.4% of peak BW | PASS |
+| Residual add + LayerNorm | 4096x4096 | PyTorch eager (x + res, F.layer_norm) | 1.623 | 165.3 GB/s | 0.84x | 51.7% of peak BW | PASS |
+| Attention (BH=16, d=64) | N=256 | unfused: cuBLAS QK^T + softmax + cuBLAS PV | 0.212 | 1,265.1 GFLOPS | 1.00x | 100.0% of unfused speed | PASS |
+| Attention (BH=16, d=64) | N=256 | fused: FlashAttention-style (online softmax, tiled K/V) | 0.236 | 1,138.0 GFLOPS | 0.90x | 89.9% of unfused speed | PASS |
+| Attention (BH=16, d=64) | N=1024 | unfused: cuBLAS QK^T + softmax + cuBLAS PV | 1.923 | 2,233.4 GFLOPS | 1.00x | 100.0% of unfused speed | PASS |
+| Attention (BH=16, d=64) | N=1024 | fused: FlashAttention-style (online softmax, tiled K/V) | 2.648 | 1,621.8 GFLOPS | 0.73x | 72.6% of unfused speed | PASS |
+| Attention (BH=16, d=64) | N=1024 | PyTorch F.scaled_dot_product_attention (FP32) | 1.657 | 2,592.8 GFLOPS | 1.16x | - | PASS |
+| Attention (BH=16, d=64) | N=1024 | PyTorch naive (matmul, softmax, matmul) | 2.345 | 1,831.5 GFLOPS | 0.82x | - | PASS |
+| Attention (BH=16, d=64) | N=2048 | unfused: cuBLAS QK^T + softmax + cuBLAS PV | 9.073 | 1,893.5 GFLOPS | 1.00x | 100.0% of unfused speed | PASS |
+| Attention (BH=16, d=64) | N=2048 | fused: FlashAttention-style (online softmax, tiled K/V) | 9.260 | 1,855.3 GFLOPS | 0.98x | 98.0% of unfused speed | PASS |
+| Attention (BH=16, d=64) | N=2048 | PyTorch F.scaled_dot_product_attention (FP32) | 6.356 | 2,702.7 GFLOPS | 1.43x | - | PASS |
+| Attention (BH=16, d=64) | N=2048 | PyTorch naive (matmul, softmax, matmul) | 10.438 | 1,645.8 GFLOPS | 0.87x | - | PASS |
+| Attention (BH=16, d=64) | N=4096 | unfused: cuBLAS QK^T + softmax + cuBLAS PV | 43.006 | 1,597.9 GFLOPS | 1.00x | 100.0% of unfused speed | PASS |
+| Attention (BH=16, d=64) | N=4096 | fused: FlashAttention-style (online softmax, tiled K/V) | 28.811 | 2,385.2 GFLOPS | 1.49x | 149.3% of unfused speed | PASS |
+| Attention (BH=16, d=64) | N=4096 | PyTorch F.scaled_dot_product_attention (FP32) | 25.637 | 2,680.4 GFLOPS | 1.68x | - | PASS |
+| Attention (BH=16, d=64) | N=4096 | PyTorch naive (matmul, softmax, matmul) | 45.831 | 1,499.4 GFLOPS | 0.94x | - | PASS |
+| Attention (BH=16, d=64) | N=8192 | unfused: cuBLAS QK^T + softmax + cuBLAS PV | 196.597 | 1,398.2 GFLOPS | 1.00x | 100.0% of unfused speed | PASS |
+| Attention (BH=16, d=64) | N=8192 | fused: FlashAttention-style (online softmax, tiled K/V) | 112.180 | 2,450.3 GFLOPS | 1.75x | 175.3% of unfused speed | PASS |
+| Attention (BH=16, d=64) | N=8192 | PyTorch F.scaled_dot_product_attention (FP32) | 100.558 | 2,733.5 GFLOPS | 1.96x | - | PASS |
+| Attention (BH=16, d=64) | N=8192 | PyTorch naive (matmul, softmax, matmul) | 197.297 | 1,393.2 GFLOPS | 1.00x | - | PASS |
+| Attention (BH=16, d=64) | N=16384 | unfused: cuBLAS QK^T + softmax + cuBLAS PV | - | - | - | - | OOM (needs 17.2 GB for S) |
+| Attention (BH=16, d=64) | N=16384 | fused: FlashAttention-style (online softmax, tiled K/V) | 453.550 | 2,424.2 GFLOPS | 1.00x | 0.0% of unfused speed | PASS |
+| Attention (BH=16, d=64) | N=16384 | PyTorch F.scaled_dot_product_attention (FP32) | 411.922 | 2,669.2 GFLOPS | 1.10x | - | PASS |

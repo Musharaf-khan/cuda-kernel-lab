@@ -1,0 +1,2 @@
+PASS | n=16777216 | 0.763 ms | 263.8 GB/s | 82% of T4 peak (320 GB/s)
+RESULT|Vector add|naive|16M floats|0.7632|263.81|GB/s|82.4|of peak BW|PASS

@@ -58,7 +58,7 @@ if command -v ncu >/dev/null; then
       || echo "   ncu failed for $name (see $NCU_DIR/${name}_roofline.err)"
   done
   echo "-- transpose bank conflicts"
-  ncu --metrics dram__throughput.avg.pct_of_peak_sustained_elapsed,l1tex__data_bank_conflicts_pipe_lsu_mem_shared_op_ld.sum,l1tex__data_bank_conflicts_pipe_lsu_mem_shared_op_st.sum \
+  ncu --clock-control none --metrics dram__throughput.avg.pct_of_peak_sustained_elapsed,l1tex__data_bank_conflicts_pipe_lsu_mem_shared_op_ld.sum,l1tex__data_bank_conflicts_pipe_lsu_mem_shared_op_st.sum \
     ./build/transpose profile > "$NCU_DIR/transpose_bank_conflicts.txt" 2>&1 || true
   echo "-- full report for GEMM v4 vs v5 (open the .ncu-rep in the Nsight Compute GUI)"
   ncu --clock-control none --set full -k regex:"sgemm_2d_regtile|sgemm_vectorized" -o "$NCU_DIR/gemm_v4_v5" -f \

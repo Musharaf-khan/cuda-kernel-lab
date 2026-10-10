@@ -1,0 +1,21 @@
+kernel,family,arithmetic_intensity_flop_per_byte,achieved_gflops,dram_gbs,bound_by_roofline
+Vector add,Memory-bound ops,0.076,21.9,287.8,memory
+Reduce v2 smem tree,Memory-bound ops,0.201,23.5,117.0,memory
+Reduce v3 warp shuffle,Memory-bound ops,0.205,61.4,299.6,memory
+GEMM v1 naive,Matrix multiply (SGEMM),7.678,59.4,7.7,memory
+GEMM v2 coalesced,Matrix multiply (SGEMM),10.249,690.4,67.4,memory
+GEMM v3 smem tiled,Matrix multiply (SGEMM),10.696,1028.8,96.2,memory
+GEMM v4 register tiled,Matrix multiply (SGEMM),77.939,3891.8,49.9,compute
+GEMM v5 vectorized,Matrix multiply (SGEMM),83.747,4697.0,56.1,compute
+cuBLAS,Matrix multiply (SGEMM),54.386,6864.7,126.2,compute
+Softmax v1 thread/row,Memory-bound ops,0.153,20.6,134.4,memory
+Softmax v2 3-pass,Memory-bound ops,0.663,146.1,220.3,memory
+Softmax v3 online,Memory-bound ops,0.763,203.8,267.3,memory
+Softmax v4 registers,Memory-bound ops,0.517,138.5,267.8,memory
+LayerNorm v1 two-pass,Memory-bound ops,0.982,197.9,201.5,memory
+LayerNorm v2 Welford,Memory-bound ops,2.475,639.6,258.4,memory
+LayerNorm v3 registers,Memory-bound ops,0.971,260.7,268.4,memory
+Add+LN unfused,Memory-bound ops,0.437,119.7,274.2,memory
+Add+LN fused,Memory-bound ops,0.538,145.2,269.7,memory
+Attention fused,Attention,300.965,2049.2,6.8,compute
+Attention unfused,Attention,11.757,2965.6,252.2,memory

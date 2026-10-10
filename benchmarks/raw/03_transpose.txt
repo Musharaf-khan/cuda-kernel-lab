@@ -1,0 +1,8 @@
+copy (ceiling)   |  0.571 ms |  235.1 GB/s |  73% of peak | PASS
+RESULT|Transpose|copy (ceiling)|4096x4096|0.5709|235.09|GB/s|73.5|of peak BW|PASS
+naive            |  1.583 ms |   84.8 GB/s |  27% of peak | PASS
+RESULT|Transpose|naive (uncoalesced writes)|4096x4096|1.5827|84.80|GB/s|26.5|of peak BW|PASS
+tiled (conflicts) |  0.732 ms |  183.4 GB/s |  57% of peak | PASS
+RESULT|Transpose|smem tiled [32][32] (bank conflicts)|4096x4096|0.7317|183.44|GB/s|57.3|of peak BW|PASS
+tiled + padded   |  0.692 ms |  193.9 GB/s |  61% of peak | PASS
+RESULT|Transpose|smem tiled [32][33] (padded)|4096x4096|0.6923|193.87|GB/s|60.6|of peak BW|PASS

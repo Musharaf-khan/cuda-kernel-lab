@@ -1,0 +1,4 @@
+name, compute_cap, clocks.max.sm [MHz], memory.total [MiB], power.limit [W], driver_version
+Tesla T4, 7.5, 1590 MHz, 15360 MiB, 70.00 W, 580.82.07
+Cuda compilation tools, release 13.0, V13.0.88
+Build cuda_13.0.r13.0/compiler.36424714_0
