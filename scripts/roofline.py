@@ -32,18 +32,46 @@ UNIT_SCALE = {"byte": 1, "kbyte": 1e3, "mbyte": 1e6, "gbyte": 1e9,
               "nsecond": 1, "usecond": 1e3, "msecond": 1e6, "second": 1e9,
               "inst": 1, "": 1}
 
-# Launch order inside each "./bench profile" run -> label. The last entry labels all remaining launches
-# (e.g. every kernel cuBLAS launches internally).
-LABELS = {
-    "vecadd":    (["Vector add"], None),
-    "reduction": (["Reduce v1 atomic", "Reduce v2 smem tree", "Reduce v3 warp shuffle"], None),
-    "gemm":      (["GEMM v1 naive", "GEMM v2 coalesced", "GEMM v3 smem tiled",
-                   "GEMM v4 register tiled", "GEMM v5 vectorized"], "cuBLAS"),
-    "softmax":   (["Softmax v1 thread/row", "Softmax v2 3-pass", "Softmax v3 online", "Softmax v4 registers"], None),
-    "layernorm": (["LayerNorm v1 two-pass", "LayerNorm v2 Welford", "LayerNorm v3 registers",
-                   "Add+LN unfused", "Add+LN unfused", "Add+LN fused"], None),
-    "attention": (["Attention fused"], "Attention unfused"),
+# Kernel name (as ncu reports it) -> chart label. Rules are checked in order; the first substring that
+# matches wins. A rule whose label is None drops the kernel. "*" matches anything left over (e.g. the
+# internal kernels cuBLAS launches). For order-based families (layernorm calls the same kernel twice),
+# ORDER_LABELS is used instead.
+NAME_RULES = {
+    "vecadd":    [("add", "Vector add")],
+    "reduction": [("reduce_atomic", "Reduce v1 atomic"), ("reduce_shared", "Reduce v2 smem tree"),
+                  ("reduce_warp", "Reduce v3 warp shuffle")],
+    "gemm":      [("sgemm_naive_uncoalesced", "GEMM v1 naive"), ("sgemm_naive_coalesced", "GEMM v2 coalesced"),
+                  ("sgemm_tiled", "GEMM v3 smem tiled"), ("sgemm_2d_regtile", "GEMM v4 register tiled"),
+                  ("sgemm_vectorized", "GEMM v5 vectorized"), ("sgemm_lab", "GEMM v6 autotuned"),
+                  ("*", "cuBLAS")],
+    "softmax":   [("softmax_thread_per_row", "Softmax v1 thread/row"), ("softmax_block_3pass", "Softmax v2 3-pass"),
+                  ("softmax_online", "Softmax v3 online"), ("softmax_registers", "Softmax v4 registers")],
+    "attention": [("flash_attention_fwd", "Attention fused v1"), ("flash_attention_split", None),
+                  ("*", "Attention unfused")],
 }
+ORDER_LABELS = {
+    "layernorm": ["LayerNorm v1 two-pass", "LayerNorm v2 Welford", "LayerNorm v3 registers",
+                  "Add+LN unfused", "Add+LN unfused", "Add+LN fused"],
+}
+
+
+def label_for(bench, index, name, attn_split_seen):
+    if bench in ORDER_LABELS:
+        labels = ORDER_LABELS[bench]
+        return labels[index] if index < len(labels) else None
+    if bench == "attention" and "flash_attention_split" in name:
+        # one point per v2 variant, labelled by its template arguments <HD, ROWS, TILE, SPLIT>
+        args = [a.strip() for a in name.split("<", 1)[1].split(">", 1)[0].split(",")] if "<" in name else []
+        if len(args) == 4:
+            return f"Attention fused v2 ({args[3]} thr/row, {args[1]} rows, tile {args[2]})"
+        attn_split_seen[0] += 1
+        return f"Attention fused v2 #{attn_split_seen[0]}"
+    for sub, label in NAME_RULES.get(bench, []):
+        if sub == "*" or sub in name:
+            return label
+    return None
+
+
 FAMILY = {"gemm": "Matrix multiply (SGEMM)", "attention": "Attention"}
 FAMILY_DEFAULT = "Memory-bound ops"
 # Reference categorical palette, slots 1-3 (validated all-pairs on the light surface).
@@ -73,12 +101,13 @@ def read_ncu_csv(path):
 
 def collect(ncu_dir):
     points = OrderedDict()
-    for bench, (names, rest) in LABELS.items():
+    for bench in list(NAME_RULES) + list(ORDER_LABELS):
         path = os.path.join(ncu_dir, f"{bench}_roofline.csv")
         if not os.path.exists(path):
             continue
+        seen = [0]
         for i, k in enumerate(read_ncu_csv(path)):
-            label = names[i] if i < len(names) else rest
+            label = label_for(bench, i, k["name"], seen)
             if label is None:
                 continue
             p = points.setdefault(label, dict(family=FAMILY.get(bench, FAMILY_DEFAULT), flops=0.0, bytes=0.0, ns=0.0))

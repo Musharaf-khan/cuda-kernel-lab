@@ -7,11 +7,15 @@
 //             memory in tiles of 32; scores live in registers and are folded into the output
 //             with ONLINE SOFTMAX (running max + rescale). The N x N matrix never exists.
 //             Extra memory: O(1) per row (just the output).
+//   fused v2  same algorithm, but each query row is split across SPLIT = 2 or 4 threads (each owns a
+//             slice of the head dimension, partial dot products combined with warp shuffles). That cuts
+//             registers per thread from 254 to ~90-130, so 2-4x more warps fit on an SM.
 //
 // Usage: ./attention [profile]
 #include "../../common/common.h"
 #include "../../common/reduce.cuh"
 #include <cublas_v2.h>
+#include <functional>
 #include <vector>
 
 constexpr int D = 64;          // head dimension
@@ -100,6 +104,91 @@ flash_attention_fwd(const float* __restrict__ Q, const float* __restrict__ K,
         o4[c] = make_float4(o[4 * c] * inv, o[4 * c + 1] * inv, o[4 * c + 2] * inv, o[4 * c + 3] * inv);
 }
 
+// ---------------------------------------------------------------- fused v2: split rows
+// SPLIT threads share one query row. Thread `sub` owns the float4 chunks c*SPLIT + sub of the head dim
+// (interleaved, so the SPLIT threads of a row read adjacent 16-byte chunks: different banks, no
+// conflicts). Scores need the full dot product: partials are summed with __shfl_xor_sync inside the
+// row's SPLIT lanes, after which every lane holds the same score and the same online-softmax state.
+template <int HD, int ROWS, int TILE, int SPLIT>
+__global__ void __launch_bounds__(ROWS * SPLIT)
+flash_attention_split(const float* __restrict__ Q, const float* __restrict__ K,
+                      const float* __restrict__ V, float* __restrict__ O, int n, float scale_log2) {
+    static_assert(SPLIT == 1 || SPLIT == 2 || SPLIT == 4 || SPLIT == 8, "SPLIT must divide a warp");
+    constexpr int NT = ROWS * SPLIT;
+    constexpr int C4 = HD / 4 / SPLIT;                          // float4 chunks owned per thread
+    __shared__ float4 Ks[TILE * HD / 4];
+    __shared__ float4 Vs[TILE * HD / 4];
+
+    const size_t head = (size_t)blockIdx.y * n * HD;
+    const int sub = threadIdx.x % SPLIT, rloc = threadIdx.x / SPLIT;
+    const int row = blockIdx.x * ROWS + rloc;
+    const float4* Kh = reinterpret_cast<const float4*>(K + head);
+    const float4* Vh = reinterpret_cast<const float4*>(V + head);
+
+    float q[4 * C4], o[4 * C4];
+    const float4* q4 = reinterpret_cast<const float4*>(Q + head + (size_t)row * HD);
+    #pragma unroll
+    for (int c = 0; c < C4; c++) {
+        float4 t = q4[c * SPLIT + sub];
+        q[4 * c + 0] = t.x * scale_log2; q[4 * c + 1] = t.y * scale_log2;
+        q[4 * c + 2] = t.z * scale_log2; q[4 * c + 3] = t.w * scale_log2;
+    }
+    #pragma unroll
+    for (int c = 0; c < 4 * C4; c++) o[c] = 0.0f;
+    float m = -INFINITY, l = 0.0f;
+
+    for (int kv = 0; kv < n; kv += TILE) {
+        for (int f = threadIdx.x; f < TILE * HD / 4; f += NT) {
+            Ks[f] = Kh[(size_t)kv * HD / 4 + f];
+            Vs[f] = Vh[(size_t)kv * HD / 4 + f];
+        }
+        __syncthreads();
+
+        float s[TILE];
+        float tile_max = -INFINITY;
+        #pragma unroll
+        for (int j = 0; j < TILE; j++) {
+            float a0 = 0.f, a1 = 0.f, a2 = 0.f, a3 = 0.f;
+            #pragma unroll
+            for (int c = 0; c < C4; c++) {
+                float4 k = Ks[j * HD / 4 + c * SPLIT + sub];
+                a0 += q[4 * c + 0] * k.x; a1 += q[4 * c + 1] * k.y;
+                a2 += q[4 * c + 2] * k.z; a3 += q[4 * c + 3] * k.w;
+            }
+            float p = (a0 + a1) + (a2 + a3);
+            #pragma unroll
+            for (int off = 1; off < SPLIT; off <<= 1) p += __shfl_xor_sync(FULL_MASK, p, off);
+            s[j] = p;
+            tile_max = fmaxf(tile_max, p);
+        }
+
+        const float m_new = fmaxf(m, tile_max);
+        const float corr = exp2f(m - m_new);
+        l *= corr;
+        #pragma unroll
+        for (int c = 0; c < 4 * C4; c++) o[c] *= corr;
+        #pragma unroll
+        for (int j = 0; j < TILE; j++) {
+            const float p = exp2f(s[j] - m_new);
+            l += p;
+            #pragma unroll
+            for (int c = 0; c < C4; c++) {
+                float4 v = Vs[j * HD / 4 + c * SPLIT + sub];
+                o[4 * c + 0] += p * v.x; o[4 * c + 1] += p * v.y;
+                o[4 * c + 2] += p * v.z; o[4 * c + 3] += p * v.w;
+            }
+        }
+        m = m_new;
+        __syncthreads();
+    }
+
+    const float inv = 1.0f / l;
+    float4* o4 = reinterpret_cast<float4*>(O + head + (size_t)row * HD);
+    #pragma unroll
+    for (int c = 0; c < C4; c++)
+        o4[c * SPLIT + sub] = make_float4(o[4 * c] * inv, o[4 * c + 1] * inv, o[4 * c + 2] * inv, o[4 * c + 3] * inv);
+}
+
 // ---------------------------------------------------------------- unfused building block
 // Online softmax over each row (same as kernels/05_softmax v3), safe to run in place.
 __global__ void softmax_rows_inplace(float* x, int n) {
@@ -183,8 +272,22 @@ int main(int argc, char** argv) {
                                       &zero, dO, D, (long long)n * D, BH);
         };
 
+        // v2 variants: (rows per block, threads per row, K/V tile)
+        struct V2 { const char* name; std::function<void()> f; };
+        std::vector<V2> v2s = {
+            {"fused v2: 2 threads/row, 64 rows, tile 32 (128 thr)",
+             [&]() { flash_attention_split<D, 64, 32, 2><<<dim3(n / 64, BH), 128>>>(dQ, dK, dV, dO, n, scale_log2); }},
+            {"fused v2: 4 threads/row, 64 rows, tile 32 (256 thr)",
+             [&]() { flash_attention_split<D, 64, 32, 4><<<dim3(n / 64, BH), 256>>>(dQ, dK, dV, dO, n, scale_log2); }},
+            {"fused v2: 4 threads/row, 64 rows, tile 64 (256 thr)",
+             [&]() { flash_attention_split<D, 64, 64, 4><<<dim3(n / 64, BH), 256>>>(dQ, dK, dV, dO, n, scale_log2); }},
+            {"fused v2: 2 threads/row, 128 rows, tile 32 (256 thr)",
+             [&]() { flash_attention_split<D, 128, 32, 2><<<dim3(n / 128, BH), 256>>>(dQ, dK, dV, dO, n, scale_log2); }},
+        };
+
         if (profile) {
-            fused(); if (unfused_fits) unfused();
+            fused(); for (auto& v : v2s) v.f();
+            if (unfused_fits) unfused();
             CHECK(cudaGetLastError()); CHECK(cudaDeviceSynchronize());
             cudaFree(dQ); cudaFree(dK); cudaFree(dV); cudaFree(dO); if (dS) cudaFree(dS);
             continue;
@@ -231,6 +334,22 @@ int main(int argc, char** argv) {
                have_ref ? "" : " (no reference: finite-check only)");
         report("Attention (BH=16, d=64)", "fused: FlashAttention-style (online softmax, tiled K/V)", size,
                fused_ms, gf, "GFLOPS", unfused_fits ? 100.0 * unfused_ms / fused_ms : 0.0, "of unfused speed", ok);
+
+        // v2: checked against the same reference; where there is none (unfused out of memory), against fused v1.
+        const char* ref_name = have_ref ? (n <= 256 ? "CPU" : "unfused") : "fused v1";
+        if (!have_ref) { hRef = hO; }
+        for (auto& v : v2s) {
+            CHECK(cudaMemset(dO, 0, qkv_bytes));
+            float ms = time_ms(v.f, iters);
+            CHECK(cudaMemcpy(hO.data(), dO, qkv_bytes, cudaMemcpyDeviceToHost));
+            float e2 = max_rel_err(hO.data(), hRef.data(), qkv);
+            bool ok2 = e2 < 1e-3f;
+            double g2 = flops / (ms / 1e3) / 1e9;
+            printf("N=%-6d %-52s | %9.3f ms | %7.1f GFLOPS | %5.2fx vs fused v1 | err %.1e vs %s %s\n",
+                   n, v.name, ms, g2, fused_ms / ms, e2, ref_name, ok2 ? "PASS" : "FAIL");
+            report("Attention (BH=16, d=64)", v.name, size, ms, g2, "GFLOPS",
+                   unfused_fits ? 100.0 * unfused_ms / ms : 0.0, "of unfused speed", ok2);
+        }
 
         cudaFree(dQ); cudaFree(dK); cudaFree(dV); cudaFree(dO); if (dS) cudaFree(dS);
     }

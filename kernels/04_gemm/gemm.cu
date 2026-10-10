@@ -5,12 +5,19 @@
 //   v3 shared-memory tiled    32x32 tiles of A and B staged in shared memory
 //   v4 2D register tiling     each thread computes an 8x8 block of C in registers
 //   v5 vectorized             v4 + float4 global loads/stores + transposed A tile
+//   v6 autotuned              the tile configuration scripts/autotune.py measured fastest for this n
+//                             (read from configs/sgemm_autotune.json; skipped if the file is missing)
 //
 // Usage:  ./gemm [n] [profile]      n must be a multiple of 128 (default 2048)
 //         ./gemm 256                small run, also checks cuBLAS against a CPU reference
 //         ./gemm 2048 profile       run each kernel once (for Nsight Compute)
 #include "../../common/common.h"
+#include "sgemm_lab.cuh"
 #include <cublas_v2.h>
+#include <fstream>
+#include <map>
+#include <sstream>
+#include <string>
 #include <vector>
 
 const int T = 32;   // tile size for v1-v3 / block is T x T = 1024 threads
@@ -198,6 +205,34 @@ static void cpu_gemm(int n, const float* A, const float* B, float* C) {
         }
 }
 
+// "choices" from configs/sgemm_autotune.json: tuned size -> config name. For n, use the choice for the
+// smallest tuned size >= n, else the largest tuned size. Empty string if no tuning file exists.
+static std::string autotuned_config(int n, std::string* source) {
+    const char* paths[] = {"configs/sgemm_autotune.json", "../../configs/sgemm_autotune.json"};
+    for (const char* p : paths) {
+        std::ifstream f(p);
+        if (!f) continue;
+        std::stringstream ss; ss << f.rdbuf();
+        const std::string s = ss.str();
+        size_t c = s.find("\"choices\"");
+        if (c == std::string::npos) continue;
+        size_t b = s.find('{', c), e = s.find('}', b);
+        const std::string body = s.substr(b + 1, e - b - 1);
+        std::map<int, std::string> m;
+        for (size_t i = 0;;) {
+            size_t q1 = body.find('"', i), q2 = body.find('"', q1 + 1), q3 = body.find('"', q2 + 1), q4 = body.find('"', q3 + 1);
+            if (q1 == std::string::npos || q4 == std::string::npos) break;
+            m[atoi(body.substr(q1 + 1, q2 - q1 - 1).c_str())] = body.substr(q3 + 1, q4 - q3 - 1);
+            i = q4 + 1;
+        }
+        if (m.empty()) continue;
+        *source = p;
+        for (auto& kv : m) if (kv.first >= n) return kv.second;
+        return m.rbegin()->second;
+    }
+    return "";
+}
+
 int main(int argc, char** argv) {
     bool profile = profile_mode(argc, argv);
     int n = 2048;
@@ -228,18 +263,27 @@ int main(int argc, char** argv) {
     };
 
     dim3 block(T, T), grid(n / T, n / T);
-    std::function<void()> launches[] = {
+    std::vector<std::function<void()>> launches = {
         [&]() { sgemm_naive_uncoalesced<<<grid, block>>>(n, dA, dB, dC); },
         [&]() { sgemm_naive_coalesced<<<grid, block>>>(n, dA, dB, dC); },
         [&]() { sgemm_tiled<<<grid, block>>>(n, dA, dB, dC); },
         [&]() { sgemm_2d_regtile<128, 128, 8, 8, 8><<<dim3(n / 128, n / 128), 256>>>(n, dA, dB, dC); },
         [&]() { sgemm_vectorized<128, 128, 8, 8, 8><<<dim3(n / 128, n / 128), 256>>>(n, dA, dB, dC); },
     };
-    const int NK = 5;
-    const char* names[] = {"v1 naive uncoalesced", "v2 naive coalesced  ", "v3 smem tiled       ",
-                           "v4 2D register tile ", "v5 vectorized float4"};
-    const char* versions[] = {"v1 naive (uncoalesced)", "v2 naive (coalesced)", "v3 shared-mem tiled 32x32",
-                              "v4 2D register tiling 8x8/thread", "v5 v4 + float4 + transposed A tile"};
+    std::vector<std::string> names = {"v1 naive uncoalesced", "v2 naive coalesced  ", "v3 smem tiled       ",
+                                      "v4 2D register tile ", "v5 vectorized float4"};
+    std::vector<std::string> versions = {"v1 naive (uncoalesced)", "v2 naive (coalesced)", "v3 shared-mem tiled 32x32",
+                                         "v4 2D register tiling 8x8/thread", "v5 v4 + float4 + transposed A tile"};
+    std::string tuned_src, tuned = autotuned_config(n, &tuned_src);
+    if (!tuned.empty() && launch_lab(tuned.c_str(), n, dA, dB, dC)) {
+        launches.push_back([&, tuned]() { launch_lab(tuned.c_str(), n, dA, dB, dC); });
+        names.push_back("v6 autotuned        ");
+        versions.push_back("v6 autotuned (" + tuned + ")");
+        printf("v6 uses autotuned config '%s' (from %s)\n", tuned.c_str(), tuned_src.c_str());
+    } else {
+        printf("v6 skipped: no usable configs/sgemm_autotune.json (run scripts/autotune.py)\n");
+    }
+    const int NK = (int)launches.size();
 
     if (profile) {                               // each kernel once, for Nsight Compute
         for (int k = 0; k < NK; k++) { launches[k](); CHECK(cudaGetLastError()); }
@@ -265,7 +309,7 @@ int main(int argc, char** argv) {
     float cublas_ms_before = time_ms(run_cublas, 20);
 
     printf("SGEMM %dx%dx%d\n", n, n, n);
-    float ms_k[NK], err_k[NK];
+    std::vector<float> ms_k(NK), err_k(NK);
     for (int k = 0; k < NK; k++) {
         CHECK(cudaMemset(dC, 0, bytes));
         ms_k[k] = time_ms(launches[k], k == 0 ? (n >= 4096 ? 2 : 5) : iters);
@@ -282,9 +326,9 @@ int main(int argc, char** argv) {
         double gf = flops / (ms_k[k] / 1e3) / 1e9;
         bool ok = err_k[k] < 1e-3f;
         printf("%s | %8.2f ms | %7.1f GFLOPS | %4.1f%% of peak | %5.1f%% of cuBLAS | err %.1e %s\n",
-               names[k], ms_k[k], gf, gf / T4_PEAK_GFLOPS * 100, gf / cublas_gf * 100, err_k[k],
+               names[k].c_str(), ms_k[k], gf, gf / T4_PEAK_GFLOPS * 100, gf / cublas_gf * 100, err_k[k],
                ok ? "PASS" : "FAIL");
-        report("SGEMM", versions[k], size, ms_k[k], gf, "GFLOPS", gf / cublas_gf * 100, "of cuBLAS", ok);
+        report("SGEMM", versions[k].c_str(), size, ms_k[k], gf, "GFLOPS", gf / cublas_gf * 100, "of cuBLAS", ok);
     }
     printf("cuBLAS               | %8.2f ms | %7.1f GFLOPS | %4.1f%% of peak | (before %.2f ms, after %.2f ms)\n",
            cublas_ms, cublas_gf, cublas_gf / T4_PEAK_GFLOPS * 100, cublas_ms_before, cublas_ms_after);
