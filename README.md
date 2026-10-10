@@ -12,6 +12,10 @@ Hand-written CUDA kernels, each built from naive to optimized, benchmarked again
 - **Reduction 133x faster** (1.9 → 247.8 GB/s) by replacing 16.7M atomics with a grid-stride loop and warp shuffles.
 - **Bank conflicts proven with counters:** padding a transpose tile from `[32][32]` to `[32][33]` took Nsight's shared-memory bank-conflict count from **16,252,928 to 0**, a number derived exactly as 524,288 warp loads × 31 replays.
 
+## Writeup
+
+[I wrote 21 CUDA kernels on a free GPU. Here's what the profiler taught me.](https://dev.to/musharaf_khanpathan_90de/i-wrote-21-cuda-kernels-on-a-free-gpu-heres-what-the-profiler-taught-me-4ed1) (dev.to): the story behind the numbers, including the results that didn't go as expected.
+
 ## Results
 
 Full table with every version, run count and check: [`benchmarks/results.md`](benchmarks/results.md) (generated from the raw logs in [`benchmarks/raw/`](benchmarks/raw)).
@@ -125,5 +129,5 @@ scripts/make_table.py     RESULT lines -> benchmarks/results.md
 scripts/roofline.py       ncu counters -> roofline charts + csv
 scripts/torch_compare.py  PyTorch baselines on identical shapes
 benchmarks/               raw logs, ncu counters and report, results table, roofline
-docs/                     learnings, interview notes, blog draft, resume bullets
+docs/learnings.md         what each optimization taught, with the profiler evidence
 ```
